@@ -2,9 +2,13 @@ import { useEffect } from 'react'
 import { useColorScheme } from 'react-native'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { SplashScreen, Stack } from 'expo-router'
+import { SplashScreen, Tabs } from 'expo-router'
 import { Provider } from 'app/provider'
 import { NativeToast } from '@my/ui/src/NativeToast'
+import { StatusBar } from 'expo-status-bar';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
@@ -40,7 +44,50 @@ function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack />
+        <StatusBar style="auto" />
+        <Tabs screenOptions={{ tabBarActiveTintColor: "teal", tabBarShowLabel: false}}>
+            <Tabs.Screen
+              name="index"
+              options={{
+                tabBarIcon: ({color, size}) => (
+                    <MaterialCommunityIcons
+                    name="home"
+                    size={size}
+                    color={color} />
+                )
+            }}/>
+            <Tabs.Screen name="feed"
+            options={{
+                tabBarIcon: ({color, size}) => (
+                    <MaterialCommunityIcons
+                    name="newspaper-variant-outline"
+                    size={size}
+                    color={color} />
+                )
+            }}/>
+            <Tabs.Screen name="challenge"
+            options={{
+                tabBarIcon: ({color, size}) => (
+                    <FontAwesome6
+                      name="trophy"
+                      size={size}
+                      color={color} />
+                )
+            }}/>
+            <Tabs.Screen name="profile"
+              options={{
+                tabBarIcon: ({color, size}) => (
+                    <FontAwesome
+                    name="user-circle"
+                    size={size}
+                    color={color} />
+                )
+              }}/>
+            <Tabs.Screen name="user/[id]"
+            options={{
+                href: null,
+            }}/>
+        </Tabs>
         <NativeToast />
       </ThemeProvider>
     </Provider>

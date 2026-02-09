@@ -6,10 +6,9 @@ export default function Screen() {
     <>
       <Stack.Screen
         options={{
-          title: 'To-do',
+          title: 'Profile',
         }}
       />
-      <HomeScreen />
     </>
   )
 }
