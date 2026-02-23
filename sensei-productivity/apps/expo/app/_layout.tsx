@@ -9,6 +9,18 @@ import { StatusBar } from 'expo-status-bar';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { SenseiProductivity } from "@aurora-interactive/sensei-productivity"
+
+
+const senseiProductivity = new SenseiProductivity({
+  bearerAuth: process.env["SENSEIPRODUCTIVITY_BEARER_AUTH"] ?? "",
+})
+
+async function run() {
+  const result = await senseiProductivity.users.login({
+    username: "Kacey40",
+    password: "fbdGuMZsSr2v5wZ",
+  })
 
 export const unstable_settings = {
   // Ensure that reloading on `/user` keeps a back button present.
