@@ -33,11 +33,12 @@
     "react-native-web": "0.21.2"
   },
   "dependencies": {
+    "@aurora-interactive/sensei-productivity": "^1.0.0",
     "@babel/runtime": "^7.24.6",
     "@tamagui/checkbox": "2.0.0-rc.16",
-    "@tamagui/cli": "^1.144.2",
-    "@tamagui/react-native-svg": "^1.144.2",
-    "@tamagui/react-native-web-lite": "^1.144.2",
+    "@tamagui/cli": "^2.0.0-rc.16",
+    "@tamagui/react-native-svg": "^2.0.0-rc.16",
+    "@tamagui/react-native-web-lite": "^2.0.0-rc.16",
     "check-dependency-version-consistency": "^4.1.0",
     "husky": "^9.1.6",
     "turbo": "^1.13.4",
