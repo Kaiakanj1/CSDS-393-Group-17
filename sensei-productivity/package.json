@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.24.6",
-    "@tamagui/checkbox": "2.0.0-rc.16",
     "@tamagui/cli": "^1.144.2",
     "@tamagui/react-native-svg": "^1.144.2",
     "@tamagui/react-native-web-lite": "^1.144.2",
