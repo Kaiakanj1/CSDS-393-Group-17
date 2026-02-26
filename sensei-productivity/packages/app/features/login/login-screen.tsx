@@ -14,7 +14,7 @@ import {
 } from 'tamagui'
 import { Input } from '../login/inputsParts'
 import { FormCard } from '../login/layoutParts'
-import { SenseiProductivity } from "../@aurora-interactive/sensei-productivity";
+import { SenseiProductivity } from "@aurora-interactive/sensei-productivity";
 
 const senseiProductivity = new SenseiProductivity({
   	bearerAuth: process.env["SENSEIPRODUCTIVITY_BEARER_AUTH"] ?? "",
