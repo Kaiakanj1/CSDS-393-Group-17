@@ -1,5 +1,8 @@
+import { HomeScreen } from 'app/features/home/screen'
 import { Facebook, Github } from '@tamagui/lucide-icons'
+import React from 'react'
 import { useState } from 'react'
+import {StyleSheet, TextInput} from 'react-native';
 import {
   Anchor,
   AnimatePresence,
@@ -10,40 +13,57 @@ import {
   SizableText,
   Spinner,
   Theme,
-  View,
+  View
 } from 'tamagui'
 import { Input } from '../login/inputsParts'
 import { FormCard } from '../login/layoutParts'
-import { SenseiProductivity } from "@aurora-interactive/sensei-productivity";
+import { SenseiProductivity } from "@aurora-interactive/sensei-productivity/core.js"
 
-const senseiProductivity = new SenseiProductivity({
+export function LoginScreen() {
+	const senseiProductivity = new SenseiProductivity({
   	bearerAuth: process.env["SENSEIPRODUCTIVITY_BEARER_AUTH"] ?? "",
 	})
-
-/** simulate signin */
-async function useSignIn() {
-	const Username = this.getElementById("username").value
-	const Password = this.getElementById("password").value
-	console.log(username, password)
-	const result = await senseiProductivity.users.login({
-		username: Username,
-		password: Password,
-	})
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
-  return {
-    status: status,
-    signIn: () => {
-      setStatus('loading')
-      setTimeout(() => {
-        setStatus('success')
-      }, 2000)
-    },
-  }
-}
-
-/** ------ EXAMPLE ------ */
-export function LoginScreen() {
+	const [uText, onChangeUsername] = React.useState('')
+	const [pText, onChangePassword] = React.useState('')
   const { signIn, status } = useSignIn()
+
+  function useSignIn() {
+		const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+		return {
+			status: status,
+			signIn: () => {
+				setStatus('loading')
+				setTimeout(() => {
+					//	tryLogIn()
+					if (uText=="Revvz" && pText=="Antonios12!")
+					{
+						console.log("Login successful")
+					}
+					else
+					{
+						console.log("Login failed")
+					}
+ 					setStatus('success')
+				}, 2000)
+			},
+		}
+
+	}
+
+// 	async function tryLogIn() {
+// 		try {
+// 			console.log("trying to log in now")
+// 			const res = await senseiProductivity.users.login({
+// 				username: {uText},
+// 				password: {pText},
+// 			})
+// 			console.log(res)
+// 		}
+// 		catch (error){
+// 			console.error("Login failed. Incorrect username or password.")
+// 		}
+// 	}
+
   return (
     <FormCard>
       <View
@@ -52,7 +72,7 @@ export function LoginScreen() {
         items="stretch"
         minW="100%"
         maxW="100%"
-        gap="$4"
+        gap="$6"
         $gtSm={{
           py: '$4',
           width: 400,
@@ -67,37 +87,29 @@ export function LoginScreen() {
         >
           Sign in to your account
         </H1>
-        <View flexDirection="column" gap="$3">
+        <View flexDirection="column" gap="$8">
           <View flexDirection="column" gap="$1">
-            <Input size="$4">
-              <Input.Label htmlFor="username">Username</Input.Label>
-              <Input.Box>
-                <Input.Area
-                	id="username"
-                	placeholder="Enter username"
-								/>
-              </Input.Box>
-            </Input>
+            <Input size="$4"
+							id="username"
+							placeholder="Enter username"
+							onChangeText={onChangeUsername}
+							defaultValue={uText}
+						></Input>
           </View>
           <View flexDirection="column" gap="$1">
-            <Input size="$4">
-              <View flexDirection="row" items="center" justify="space-between">
-                <Input.Label htmlFor={'password'}>Password</Input.Label>
-              </View>
-              <Input.Box>
-                <Input.Area
-                  secureTextEntry
-                  id={'password'}
-                  placeholder="Enter password"
-                />
-              </Input.Box>
-              <ForgotPasswordLink />
-            </Input>
+            <Input
+            	size="$4"
+            	secureTextEntry
+							id={'password'}
+							placeholder="Enter password"
+							onChangeText={onChangePassword}
+							defaultValue={pText}
+						></Input>
+            <ForgotPasswordLink />
           </View>
         </View>
 
         <Button
-          theme="accent"
           disabled={status === 'loading'}
           onPress={signIn}
           width="100%"
@@ -163,6 +175,8 @@ export function LoginScreen() {
     </FormCard>
   )
 }
+
+
 
 
 
