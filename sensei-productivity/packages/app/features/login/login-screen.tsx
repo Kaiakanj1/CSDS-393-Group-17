@@ -32,6 +32,7 @@ export function LoginScreen() {
 			signIn: () => {
 				setStatus('loading')
 				setTimeout(() => {
+
 					tryLogIn()
  					setStatus('success')
 				}, 2000)
