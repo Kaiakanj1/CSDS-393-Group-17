@@ -20,9 +20,7 @@ import { FormCard } from '../login/layoutParts'
 import { SenseiProductivity } from "@aurora-interactive/sensei-productivity/core.js"
 
 export function LoginScreen() {
-	const senseiProductivity = new SenseiProductivity({
-  	bearerAuth: process.env["SENSEIPRODUCTIVITY_BEARER_AUTH"] ?? "",
-	})
+	const senseiProductivity = new SenseiProductivity({})
 	const [uText, onChangeUsername] = React.useState('')
 	const [pText, onChangePassword] = React.useState('')
   const { signIn, status } = useSignIn()
@@ -34,15 +32,7 @@ export function LoginScreen() {
 			signIn: () => {
 				setStatus('loading')
 				setTimeout(() => {
-					//	tryLogIn()
-					if (uText=="Revvz" && pText=="Antonios12!")
-					{
-						console.log("Login successful")
-					}
-					else
-					{
-						console.log("Login failed")
-					}
+					tryLogIn()
  					setStatus('success')
 				}, 2000)
 			},
@@ -50,19 +40,19 @@ export function LoginScreen() {
 
 	}
 
-// 	async function tryLogIn() {
-// 		try {
-// 			console.log("trying to log in now")
-// 			const res = await senseiProductivity.users.login({
-// 				username: {uText},
-// 				password: {pText},
-// 			})
-// 			console.log(res)
-// 		}
-// 		catch (error){
-// 			console.error("Login failed. Incorrect username or password.")
-// 		}
-// 	}
+	async function tryLogIn() {
+		try {
+			console.log("trying to log in now")
+			const res = await senseiProductivity.users.login({
+				username: {uText},
+				password: {pText},
+			})
+			console.log(res)
+		}
+		catch (error){
+			console.error("Login failed. Incorrect username or password.")
+		}
+	}
 
   return (
     <FormCard>
