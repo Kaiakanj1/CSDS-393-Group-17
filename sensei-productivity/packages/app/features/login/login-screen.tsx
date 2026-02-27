@@ -17,7 +17,7 @@ import {
 } from 'tamagui'
 import { Input } from '../login/inputsParts'
 import { FormCard } from '../login/layoutParts'
-import { SenseiProductivity } from "@aurora-interactive/sensei-productivity/core.js"
+import { SenseiProductivity } from "@aurora-interactive/sensei-productivity"
 
 export function LoginScreen() {
 	const senseiProductivity = new SenseiProductivity({})
@@ -45,9 +45,10 @@ export function LoginScreen() {
 		try {
 			console.log("trying to log in now")
 			const res = await senseiProductivity.users.login({
-				username: {uText},
-				password: {pText},
+				username: uText,
+				password: pText,
 			})
+      console.log("Login successful!")
 			console.log(res)
 		}
 		catch (error){
@@ -64,10 +65,6 @@ export function LoginScreen() {
         minW="100%"
         maxW="100%"
         gap="$6"
-        $gtSm={{
-          py: '$4',
-          width: 400,
-        }}
       >
         <H1
           self="center"
@@ -80,22 +77,21 @@ export function LoginScreen() {
         </H1>
         <View flexDirection="column" gap="$8">
           <View flexDirection="column" gap="$1">
-            <Input size="$4"
+            <TextInput 
 							id="username"
 							placeholder="Enter username"
 							onChangeText={onChangeUsername}
 							defaultValue={uText}
-						></Input>
+						></TextInput>
           </View>
           <View flexDirection="column" gap="$1">
-            <Input
-            	size="$4"
+            <TextInput
             	secureTextEntry
 							id={'password'}
 							placeholder="Enter password"
 							onChangeText={onChangePassword}
 							defaultValue={pText}
-						></Input>
+						></TextInput>
             <ForgotPasswordLink />
           </View>
         </View>
