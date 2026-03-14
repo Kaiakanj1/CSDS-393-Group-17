@@ -18,6 +18,7 @@ import {
 import { Input } from '../login/inputsParts'
 import { FormCard } from '../login/layoutParts'
 import { SenseiProductivity } from "@aurora-interactive/sensei-productivity"
+import {appStorage} from "../lib/storage.js"
 
 export function LoginScreen() {
 	const senseiProductivity = new SenseiProductivity({})
@@ -48,8 +49,7 @@ export function LoginScreen() {
 				username: uText,
 				password: pText,
 			})
-      console.log("Login successful!")
-			console.log(res)
+      appStorage.set("accessToken", res.accessToken);
 		}
 		catch (error){
 			console.error("Login failed. Incorrect username or password.")
