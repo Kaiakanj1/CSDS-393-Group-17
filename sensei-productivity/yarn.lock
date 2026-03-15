@@ -27,12 +27,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aurora-interactive/sensei-productivity@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@aurora-interactive/sensei-productivity@npm:1.0.0"
+"@aurora-interactive/sensei-productivity@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@aurora-interactive/sensei-productivity@npm:1.5.0"
   dependencies:
     zod: "npm:^3.25.65 || ^4.0.0"
-  checksum: 10/e426afe80cfae0e3f75525ca251698980c65b81972fa3a8e1d899d6dacf7ecd51dbfbab7d8e1e0c3a19e7687856dc52ef7bb9192f1afa8ba647b45780fa4cdc1
+  checksum: 10/76efb3c249d063cc537cb7fcee3bef37170f846cb94d9f65639e53be98cb50a31ed15a05c09561d8929fca36b533d0c5e856a035b90f25073adc6241ba564391
   languageName: node
   linkType: hard
 
@@ -15628,7 +15628,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sensei-productivity@workspace:."
   dependencies:
-    "@aurora-interactive/sensei-productivity": "npm:^1.0.0"
+    "@aurora-interactive/sensei-productivity": "npm:^1.5.0"
     "@babel/runtime": "npm:^7.24.6"
     "@biomejs/biome": "npm:^1.9.3"
     "@tamagui/checkbox": "npm:2.0.0-rc.16"
