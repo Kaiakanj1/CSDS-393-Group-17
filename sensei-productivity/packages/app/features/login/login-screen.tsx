@@ -32,11 +32,12 @@ export function LoginScreen() {
 			status: status,
 			signIn: () => {
 				setStatus('loading')
-				setTimeout(() => {
+				return new Promise(async (resolve, reject) => {
 
-					tryLogIn()
+					await tryLogIn()
  					setStatus('success')
-				}, 2000)
+          resolve(true);
+				})
 			},
 		}
 
@@ -44,7 +45,6 @@ export function LoginScreen() {
 
 	async function tryLogIn() {
 		try {
-			console.log("trying to log in now")
 			const res = await senseiProductivity.users.login({
 				username: uText,
 				password: pText,
