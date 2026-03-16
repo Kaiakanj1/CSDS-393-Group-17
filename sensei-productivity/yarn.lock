@@ -27,12 +27,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aurora-interactive/sensei-productivity@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@aurora-interactive/sensei-productivity@npm:1.5.0"
+"@aurora-interactive/sensei-productivity@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@aurora-interactive/sensei-productivity@npm:1.6.0"
   dependencies:
     zod: "npm:^3.25.65 || ^4.0.0"
-  checksum: 10/76efb3c249d063cc537cb7fcee3bef37170f846cb94d9f65639e53be98cb50a31ed15a05c09561d8929fca36b533d0c5e856a035b90f25073adc6241ba564391
+  checksum: 10/bbc490f92b1991cd91698f906c988d3d05e3c619f70ab20ae0ffd6f47c41d19f0739d710552e0c15ddf413a01ffc7f54215f8ec824143171084d12c27fe70dc2
   languageName: node
   linkType: hard
 
@@ -7345,6 +7345,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bluebird@npm:^3":
+  version: 3.5.42
+  resolution: "@types/bluebird@npm:3.5.42"
+  checksum: 10/09ad60b083f916c7611936d3c70986df8f2eae11e46768ab7901d86bee5b1ca6b00cd9ef8cc0d3761256e2bc4ada3388e5529f71745a6b3d7602e868e3530310
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:1.0.6, @types/estree@npm:^1.0.0":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
@@ -8506,6 +8513,13 @@ __metadata:
   dependencies:
     file-uri-to-path: "npm:1.0.0"
   checksum: 10/593d5ae975ffba15fbbb4788fe5abd1e125afbab849ab967ab43691d27d6483751805d98cb92f7ac24a2439a8a8678cd0131c535d5d63de84e383b0ce2786133
+  languageName: node
+  linkType: hard
+
+"bluebird@npm:^3.7.2":
+  version: 3.7.2
+  resolution: "bluebird@npm:3.7.2"
+  checksum: 10/007c7bad22c5d799c8dd49c85b47d012a1fe3045be57447721e6afbd1d5be43237af1db62e26cb9b0d9ba812d2e4ca3bac82f6d7e016b6b88de06ee25ceb96e7
   languageName: node
   linkType: hard
 
@@ -10675,6 +10689,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "expo-app@workspace:apps/expo"
   dependencies:
+    "@aurora-interactive/sensei-productivity": "npm:1.6.0"
     "@babel/core": "npm:^7.24.6"
     "@babel/runtime": "npm:^7.26.0"
     "@expo/config-plugins": "npm:~10.0.0"
@@ -10683,8 +10698,10 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.3.12"
     "@react-navigation/native": "npm:^7.1.8"
     "@tamagui/babel-plugin": "npm:^1.144.2"
+    "@types/bluebird": "npm:^3"
     app: "npm:0.0.0"
     babel-plugin-module-resolver: "npm:^5.0.2"
+    bluebird: "npm:^3.7.2"
     burnt: "npm:^0.12.2"
     expo: "npm:~53.0.8"
     expo-constants: "npm:~17.1.6"
@@ -15628,7 +15645,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sensei-productivity@workspace:."
   dependencies:
-    "@aurora-interactive/sensei-productivity": "npm:^1.5.0"
+    "@aurora-interactive/sensei-productivity": "npm:1.6.0"
     "@babel/runtime": "npm:^7.24.6"
     "@biomejs/biome": "npm:^1.9.3"
     "@tamagui/checkbox": "npm:2.0.0-rc.16"

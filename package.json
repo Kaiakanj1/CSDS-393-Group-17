@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@aurora-interactive/sensei-productivity": "^1.5.0"
+    "@aurora-interactive/sensei-productivity": "1.6.0"
   }
 }
