@@ -45,7 +45,7 @@ function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === 'dark' ? "light" : "dark"} />
 
         <Tabs screenOptions={{ tabBarActiveTintColor: "teal", tabBarShowLabel: false}}>
             <Tabs.Screen

@@ -1,14 +1,15 @@
-import { HomeScreen } from 'app/features/home/screen'
 import { Stack } from 'expo-router'
+import { SocialFeedScreen } from "app/features/feed/social-feed"
 
 export default function Screen() {
   return (
     <>
       <Stack.Screen
         options={{
-          title: 'Feed',
+          title: 'Social Activity Feed',
         }}
       />
+      <SocialFeedScreen />
     </>
   )
 }
