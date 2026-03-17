@@ -5,32 +5,35 @@ import { Text } from "react-native"
 import { ChevronLeft } from '@tamagui/lucide-icons'
 import { useRouter } from 'solito/navigation'
 import { appStorage } from "../lib/storage.js"
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, MessageText } from 'react-native-gifted-chat'
 import { useState, useEffect, useRef } from 'react'
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { map as promiseMap } from "bluebird";
 import Markdown from "react-native-markdown-display";
-import { MessageText } from "react-native-gifted-chat";
-
-const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
 
 export function SocialFeedScreen() {
     const router = useRouter();
     const [error, setError] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [userId, setUserId] = useState(-1);
+    
+    const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
     const [morePreviousMessagesAvailable, setMorePreviousMessagesAvailable] = useState(true);
-    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [messages, setMessages] = useState([]);
 
     const loadingRef = useRef(true);
-    const lastMessageIdRef = useRef(-1);
-    const firstMessageIdRef = useRef(-1);
+    const loadingMessagesRef = useRef(false);
+    const hasInitialMessageLoadRef = useRef(false);
+    
+    const oldestMessageIdRef = useRef(-1);
+    const newestMessageIdRef = useRef(-1);
+    
     const userIdRef = useRef(-1);
     const accessTokenRef = useRef("");
 
-    const [messages, setMessages] = useState([])
+    const sortMessagesByDate = messages => messages.sort((a, b) => {
+        return new Date(a.postDate) - new Date(b.postDate)
+    });
 
     const renderMessageText = (props) => {
         const { currentMessage } = props;
@@ -43,7 +46,7 @@ export function SocialFeedScreen() {
                 </Markdown>
             );
         }
-        return <MessageText {...props} />; // default fallback
+        return <MessageText {...props} />; 
     };
 
     const messageToGiftedChat = async (message, token, currentUserId) => {
@@ -52,15 +55,11 @@ export function SocialFeedScreen() {
         });
 
         try {
-            const postData = await sdk.users.posts.getByPostId({
-                id: message.postId
-            });
-            const userData = await sdk.users.get({
-                id: message.userId
-            });
+            const postData = await sdk.users.posts.getByPostId({ id: message.postId });
+            const userData = await sdk.users.get({ id: message.userId });
 
             return {
-                _id: message.userId,
+                _id: message.postId,
                 text: `${userData?.firstName} ${userData?.lastName} completed a **${postData?.categoryName}** task!\n\n ${postData.caption ?? ""}`,
                 createdAt: message.postDate,
                 user: {
@@ -69,213 +68,168 @@ export function SocialFeedScreen() {
                 },
             };
         } catch (e) {
-            console.log("Failed to get post data for post", message, "returning sample format for post instead!");
-            console.log(e);
-
+            console.log("Failed to get post data for post", message, "returning sample format instead!", e);
             return {
-                _id: message.userId,
+                _id: message.postId,
                 text: "Sample",
                 createdAt: message.postDate,
-                user: {
-                    _id: 1
-                },
+                user: { _id: 1 },
             };
         }
     };
 
     useEffect(() => {
         async function profileFetch() {
-            const accessToken = appStorage.getString("accessToken");
-            if (accessToken === undefined) {
+            // react >= 18 double-queues useEffect using sleep queues
+            // mitigate using an early return guard
+            if (hasInitialMessageLoadRef.current) return;
+
+            const token = appStorage.getString("accessToken");
+            if (!token) {
                 setError("Please login and then go back to this screen");
                 loadingRef.current = false;
                 return;
             }
 
-            setAccessToken(accessToken);
-            accessTokenRef.current = accessToken;
+            setAccessToken(token);
+            accessTokenRef.current = token;
             loadingRef.current = false;
 
-            const sdk = new SenseiProductivity({
-                bearerAuth: `Bearer ${accessToken}`
-            });
+            const sdk = new SenseiProductivity({ bearerAuth: `Bearer ${token}` });
 
-            let profileInfo;
             try {
-                profileInfo = await sdk.users.me();
+                const profileInfo = await sdk.users.me();
                 setUserId(profileInfo.userId);
                 userIdRef.current = profileInfo.userId;
             } catch (e) {
-                console.log(e)
+                console.log(e);
                 setError("Failed to get user profile. Restart the app and check your internet!");
                 return;
             }
 
-            while (loadingMessages) {
-                await sleep(1000);
-            }
+            if (loadingMessagesRef.current) return;
+            loadingMessagesRef.current = true;
 
-            setLoadingMessages(true);
             try {
-                const newMessages = await sdk.users.posts.feed({
-                    limit: 20
-                });
+                const newMessages = await sdk.users.posts.feed({ limit: 20 });
+                
                 if (newMessages?.length < 20) setMorePreviousMessagesAvailable(false);
-                if (newMessages?.length === 0) {
-                    loadingRef.current = false;
-                    setLoadingMessages(false);
-                    return;
+                
+                if (newMessages?.length > 0) {
+                    const sorted = sortMessagesByDate(newMessages);
+                    
+                    oldestMessageIdRef.current = sorted[0].postId;
+                    newestMessageIdRef.current = sorted.at(-1).postId;
+
+                    const formattedMessages = await promiseMap(sorted, msg => messageToGiftedChat(msg, token, userIdRef.current));
+                    setMessages(formattedMessages);
                 }
-
-                firstMessageIdRef.current = newMessages[0].postId;
-                lastMessageIdRef.current = newMessages?.at(-1)?.postId;
-
-                const formattedMessages = await promiseMap(newMessages, msg => messageToGiftedChat(msg, accessToken, userId));
-
-                setMessages(previousMessages =>
-                    GiftedChat.append(previousMessages, formattedMessages),
-                );
-                setLoadingMessages(false)
+                
+                hasInitialMessageLoadRef.current = true;
             } catch (e) {
                 console.log(e);
-                setLoadingMessages(false)
                 setError("Failed to get social feed. Please reload the app and check your internet connection.");
-                return;
+            } finally {
+                loadingMessagesRef.current = false;
             }
-            setLoadingMessages(false);
         }
 
         profileFetch();
     }, []);
-
-    if (error !== "") {
-        return (<Text style={{ color: "red" }}>{error ?? ""}</Text>)
-    }
 
     useEffect(() => {
         let timeoutId;
         let isStopped = false;
 
         const fetchNewMessagesCallback = async () => {
-            if (firstMessageIdRef.current === -1) {
-                if (!isStopped) {
-                    timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
-                }
+            if (newestMessageIdRef.current === -1 || !hasInitialMessageLoadRef.current || loadingMessagesRef.current) {
+                if (!isStopped) timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
                 return;
             }
 
-            const sdk = new SenseiProductivity({
-                bearerAuth: `Bearer ${accessTokenRef.current}`
-            });
-
-            while (loadingMessages) {
-                await sleep(1000);
-            }
-
-            setLoadingMessages(true);
+            loadingMessagesRef.current = true;
+            const sdk = new SenseiProductivity({ bearerAuth: `Bearer ${accessTokenRef.current}` });
 
             try {
                 const newMessages = await sdk.users.posts.feed({
-                    lastPostId: firstMessageIdRef.current,
+                    lastPostId: newestMessageIdRef.current,
                     limit: 20
                 });
 
-                if (newMessages?.length === 0) {
-                    console.log("No new messages!");
-                    if (!isStopped) {
-                        // schedule the next polling call
-                        timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
-                    }
-                    setLoadingMessages(false);
-                    return;
+                if (newMessages?.length > 0) {
+                    const sorted = sortMessagesByDate(newMessages);
+                    newestMessageIdRef.current = sorted.at(-1).postId;
+
+                    const formattedMessages = await promiseMap(sorted, msg => messageToGiftedChat(msg, accessTokenRef.current, userIdRef.current));
+                    
+                    setMessages(previousMessages => GiftedChat.append(previousMessages, formattedMessages));
                 }
-
-                const formattedMessages = await promiseMap(newMessages, msg => messageToGiftedChat(msg, accessTokenRef.current, userIdRef.current));
-
-                firstMessageIdRef.current = newMessages.at(-1).postId;
-                setMessages(previousMessages =>
-                    GiftedChat.append(previousMessages, formattedMessages),
-                );
-
-                console.log("Captured new messages!");
-                setLoadingMessages(false);
             } catch (e) {
-                console.log("Failed to poll for new messages!")
-                console.log(e)
-            }
-
-            if (!isStopped) {
-                // schedule next polling call
-                timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
+                console.log("Failed to poll for new messages!", e);
+            } finally {
+                loadingMessagesRef.current = false;
+                if (!isStopped) timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
             }
         };
 
-        fetchNewMessagesCallback();
+        timeoutId = setTimeout(fetchNewMessagesCallback, 1000);
 
-        // clean up when unmounting
         return () => {
             isStopped = true;
             clearTimeout(timeoutId);
         };
     }, []);
 
+    if (error !== "") {
+        return <Text style={{ color: "red" }}>{error}</Text>
+    }
+
     return (
         <>
             <GiftedChat
                 messages={messages}
                 onSend={() => { }}
-                isScrollToBottomEnabled={morePreviousMessagesAvailable}
+                isScrollToBottomEnabled={true}
                 renderMessageText={renderMessageText}
                 loadEarlierMessagesProps={{
                     onPress: async () => {
-                        while (loadingRef.current) {
-                            await sleep(250);
-                        }
+                        if (loadingMessagesRef.current || isLoadingEarlier || !hasInitialMessageLoadRef.current) return;
 
-                        const sdk = new SenseiProductivity({
-                            bearerAuth: `Bearer ${accessToken}`
-                        });
+                        setIsLoadingEarlier(true);
+                        loadingMessagesRef.current = true;
+                        
+                        const sdk = new SenseiProductivity({ bearerAuth: `Bearer ${accessToken}` });
 
-                        while (loadingMessages) {
-                            await sleep(250);
-                        }
-
-                        setLoadingMessages(true);
                         try {
                             const feed = await sdk.users.posts.feed({
-                                lastPostId: lastMessageIdRef.current,
+                                lastPostId: oldestMessageIdRef.current, 
                                 limit: 20
                             });
 
                             if (feed?.length < 20) setMorePreviousMessagesAvailable(false);
-                            if (feed?.length === 0) return;
+                            
+                            if (feed?.length > 0) {
+                                const sorted = sortMessagesByDate(feed);
+                                oldestMessageIdRef.current = sorted[0].postId;
 
-                            lastMessageIdRef.current = feed?.at(-1)?.postId;
-
-                            const updatedMessages = await promiseMap(feed, async msg => await messageToGiftedChat(msg, accessToken, userId));
-                            setMessages(previousMessages =>
-                                GiftedChat.append(previousMessages, updatedMessages),
-                            );
-                            setLoadingMessages(false);
+                                const updatedMessages = await promiseMap(sorted, msg => messageToGiftedChat(msg, accessToken, userId));
+                                setMessages(previousMessages => GiftedChat.prepend(previousMessages, updatedMessages));
+                            }
                         } catch (e) {
-                            console.log("Failed to fetch continuation of social feed!");
-                            console.log(e);
-                            setLoadingMessages(false);
+                            console.log("Failed to fetch continuation of social feed!", e);
+                        } finally {
+                            loadingMessagesRef.current = false;
+                            setIsLoadingEarlier(false);
                         }
                     },
                     isInfiniteScrollEnabled: true,
-                    isLoading: morePreviousMessagesAvailable,
+                    isLoading: isLoadingEarlier, 
                     isAvailable: morePreviousMessagesAvailable,
                     label: "Loading earlier social feed..."
                 }}
-                user={{
-                    _id: userId,
-                }}
+                user={{ _id: userId }}
             />
-            <Button
-                icon={ChevronLeft}
-                onPress={() => router.back()}
-            >
+            <Button icon={ChevronLeft} onPress={() => router.back()}>
                 Go Home
             </Button>
         </>
