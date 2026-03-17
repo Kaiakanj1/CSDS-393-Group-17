@@ -32,7 +32,7 @@ export function SocialFeedScreen() {
     const accessTokenRef = useRef("");
 
     const sortMessagesByDate = messages => messages.sort((a, b) => {
-        return new Date(a.postDate) - new Date(b.postDate)
+        return new Date(b.postDate) - new Date(a.postDate)
     });
 
     const renderMessageText = (props) => {
@@ -118,8 +118,8 @@ export function SocialFeedScreen() {
                 if (newMessages?.length > 0) {
                     const sorted = sortMessagesByDate(newMessages);
                     
-                    oldestMessageIdRef.current = sorted[0].postId;
-                    newestMessageIdRef.current = sorted.at(-1).postId;
+                    oldestMessageIdRef.current = sorted.at(-1).postId;
+                    newestMessageIdRef.current = sorted[0].postId;
 
                     const formattedMessages = await promiseMap(sorted, msg => messageToGiftedChat(msg, token, userIdRef.current));
                     setMessages(formattedMessages);
@@ -158,7 +158,7 @@ export function SocialFeedScreen() {
 
                 if (newMessages?.length > 0) {
                     const sorted = sortMessagesByDate(newMessages);
-                    newestMessageIdRef.current = sorted.at(-1).postId;
+                    newestMessageIdRef.current = sorted[0].postId;
 
                     const formattedMessages = await promiseMap(sorted, msg => messageToGiftedChat(msg, accessTokenRef.current, userIdRef.current));
                     
