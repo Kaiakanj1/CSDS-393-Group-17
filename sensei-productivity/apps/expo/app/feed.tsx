@@ -1,4 +1,4 @@
-import { HomeScreen } from 'app/features/home/screen'
+import { FeedScreen } from 'app/features/feed/feed-screen'
 import { Stack } from 'expo-router'
 
 export default function Screen() {
@@ -9,6 +9,7 @@ export default function Screen() {
           title: 'Feed',
         }}
       />
+      <FeedScreen />
     </>
   )
 }

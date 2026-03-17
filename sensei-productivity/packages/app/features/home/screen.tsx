@@ -8,6 +8,7 @@ import type { CheckboxProps } from 'tamagui'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Feather from '@expo/vector-icons/Feather'
 import { useState } from 'react'
 import { View, StyleSheet, Platform } from 'react-native'
 import { useLink } from 'solito/navigation'
@@ -49,10 +50,11 @@ export function HomeScreen() {
       <YStack
 				items="center"
 				bg="#404040"
+        gap="$6"
       >
 				<XStack
 					width="100%"
-					height="70%"
+					height="68%"
 					gap="$4"
 					justify="center"
 					flexWrap="wrap"
@@ -70,6 +72,7 @@ export function HomeScreen() {
             <View style={{
 							backgroundColor: "white",
 							borderStyle: "solid",
+              height: "100%",
 							borderTopLeftRadius: 10,
 							borderBottomLeftRadius: 10,
 							flex: 1,
@@ -92,8 +95,8 @@ export function HomeScreen() {
 						</View>
           </YStack>
         </XStack>
-    	</YStack>
 			<SheetDemo />
+    	</YStack>
     </YStack>
   )
 }
@@ -131,14 +134,18 @@ function SheetDemo() {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState(0)
 
+  function newTask() {
+    console.log("New task open=" + open)
+    setOpen(true)
+  }
   return (
     <>
       <Button
         size="$6"
-        icon={open ? ChevronDown : ChevronUp}
-        onPress={() => setOpen((x) => !x)}
+        icon={<Feather name="edit" size={24} color="black" />}
+        onPress={() => newTask()}
       >
-      	New Task
+      	{"New Task"}
       </Button>
       <Sheet
         modal
