@@ -1,4 +1,4 @@
-import { HomeScreen } from 'app/features/home/screen'
+import { ChallengeAdminScreen } from 'app/features/challenge/challenge-screen'
 import { Stack } from 'expo-router'
 
 export default function Screen() {
@@ -9,6 +9,7 @@ export default function Screen() {
           title: 'Challenge',
         }}
       />
+      <ChallengeAdminScreen />
     </>
   )
 }
