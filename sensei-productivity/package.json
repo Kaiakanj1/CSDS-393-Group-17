@@ -33,7 +33,7 @@
     "react-native-web": "0.21.2"
   },
   "dependencies": {
-    "@aurora-interactive/sensei-productivity": "^1.0.0",
+    "@aurora-interactive/sensei-productivity": "^1.7.0",
     "@babel/runtime": "^7.24.6",
     "@tamagui/checkbox": "2.0.0-rc.16",
     "@tamagui/cli": "^2.0.0-rc.16",
