@@ -80,17 +80,14 @@ export function HomeScreen() {
 							paddingRight: 0}}
             >
             	<ScrollView
-            		bg="white"
+            		bg="#EC417A"
             		stickyHeaderIndices={[0]}
             		id="TaskList"
             	>
 								<H1 size="$8" bg="white" width="100%" p="$1">Tasks</H1>
-								<TaskCheckbox />
 								<TaskCheckbox label="Task number 1!" />
 								<TaskCheckbox label="Task number 2!" />
 								<TaskCheckbox label="Task number 3!" />
-								<TaskCheckbox label="Task number 10!" />
-								<TaskCheckbox label="Task number 15!" />
 							</ScrollView>
 						</View>
           </YStack>
@@ -122,7 +119,7 @@ function TaskCheckbox({
 						{label}
 					</Label>
 				</XStack>
-					<Paragraph>Deadline: </Paragraph>
+					<Paragraph>Deadline: March 20, 2026</Paragraph>
       </YStack>
     </Theme>
   )

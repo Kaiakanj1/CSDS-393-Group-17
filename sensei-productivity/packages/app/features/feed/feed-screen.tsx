@@ -220,12 +220,11 @@ function FilterChip({
     <Button
       size="$3"
       onPress={onPress}
-      bg={bg}
+      style={{ backgroundColor: bg, borderColor: active ? '#888' : bg }}
       borderWidth={1}
       borderStyle="solid"
-      borderEndColor={active ? bg : '#888'}
       color="white"
-      opacity={active ? 0.8 : 1}
+      opacity={active ? 0.7 : 1}
     >
       {label}
     </Button>

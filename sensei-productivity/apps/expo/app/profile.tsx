@@ -1,4 +1,5 @@
-import { LoginScreen } from 'app/features/login/login-screen'
+import { ProfileScreen } from 'app/features/profile/profile-screen'
+
 import { Stack } from 'expo-router'
 
 export default function Screen() {
@@ -9,7 +10,7 @@ export default function Screen() {
           title: 'Profile',
         }}
       />
-      <LoginScreen />
+      <ProfileScreen />
     </>
   )
 }
