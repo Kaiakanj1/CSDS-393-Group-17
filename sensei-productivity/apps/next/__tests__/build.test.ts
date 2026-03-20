@@ -55,7 +55,6 @@ test('Next.js build completes', async () => {
     // Check for specific route patterns (app router only)
     expect(result).toContain('○ /')
     expect(result).toContain('○ /_not-found')
-    expect(result).toContain('ƒ /user/[id]')
 
     // Check for static and dynamic route indicators
     expect(result).toContain('○  (Static)   prerendered as static content')

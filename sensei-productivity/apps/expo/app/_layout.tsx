@@ -98,10 +98,6 @@ function RootLayoutNav() {
                     color={color} />
                 )
               }} />
-            <Tabs.Screen name="user/[id]"
-              options={{
-                href: null,
-              }} />
           </Tabs>
         }
         <NativeToast />
