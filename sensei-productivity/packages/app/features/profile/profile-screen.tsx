@@ -110,7 +110,7 @@ export function ProfileScreen() {
                       128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />}
   function handleAction() {
     if (canClick) {
-      ToastAndroid.show("@" + profile.userName + ": " + actionToast[profile.userClass], ToastAndroid.SHORT)
+      //ToastAndroid.show("@" + profile.userName + ": " + actionToast[profile.userClass], ToastAndroid.SHORT)
       console.log("@" + profile.userName + ": " + actionToast[profile.userClass])
     }
     setCanClick(!canClick)

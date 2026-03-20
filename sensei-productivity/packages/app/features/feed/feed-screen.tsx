@@ -14,6 +14,7 @@ import {
 } from '@my/ui'
 import { Heart, Bell } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
+import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 
 type FeedPost = {
@@ -169,6 +170,12 @@ function formatDate(date: Date) {
 }
 
 function FeedCard({ post }: { post: FeedPost }) {
+  const [liked, setLiked] = useState(false)
+  const [likes, setLikes] = useState(0)
+  function changeLike() {
+    setLiked(!liked)
+    setLikes(liked ? 0 : 1)
+  }
   return (
     <Theme>
       <YStack
@@ -203,8 +210,11 @@ function FeedCard({ post }: { post: FeedPost }) {
           <Separator />
 
           <XStack items="center" gap="$2">
-            <Heart size={16} />
-            <Paragraph>{post.likes} likes</Paragraph>
+            <Button 
+              icon={!liked ? <Entypo name="heart-outlined" size={24} color="black" /> : <Entypo name="heart" size={24} color="red" /> }
+              onPress={() => changeLike()}
+            />
+            <Paragraph>{likes} likes</Paragraph>
           </XStack>
         </YStack>
       </YStack>
