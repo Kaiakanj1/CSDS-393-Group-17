@@ -10259,6 +10259,9 @@ __metadata:
     react-dom: "npm:19.0.0"
     react-native: "npm:0.79.2"
     react-native-gesture-handler: "npm:~2.24.0"
+    react-native-mmkv: "npm:^4.2.0"
+    react-native-nitro-modules: "npm:^0.35.2"
+    react-native-restart: "npm:^0.0.27"
     react-native-safe-area-context: "npm:5.4.0"
     react-native-screens: "npm:~4.10.0"
     react-native-svg: "npm:15.8.0"
@@ -14409,6 +14412,37 @@ __metadata:
     react: ">=18.2.0"
     react-native: ">=0.73.0"
   checksum: 10/4e07c1e34c01c8d50fd7c1d0460db06f6f0515197405230386a8ffb950cb724b10743af032310d1384df0a90059bfb8992ba2d93344ce86315315f0493feccc2
+  languageName: node
+  linkType: hard
+
+"react-native-mmkv@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "react-native-mmkv@npm:4.2.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-nitro-modules: "*"
+  checksum: 10/8f0e919eb3add26d47a9d5e171672928c322c89ef92108375ffcc2829d40a5d1727f6b9bed771d1fc7abf76f80695e522d47699c8a891c36a98b04afd3a8d1d1
+  languageName: node
+  linkType: hard
+
+"react-native-nitro-modules@npm:^0.35.2":
+  version: 0.35.2
+  resolution: "react-native-nitro-modules@npm:0.35.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/22977e5e22c63fb91526c90fa59fcfe5c7f97978c583400f433a1d3ef8ee32fbceb0ad1b009b5bf0d1794e94a11716ad752fd7702c2d67fc808a0256c6e35488
+  languageName: node
+  linkType: hard
+
+"react-native-restart@npm:^0.0.27":
+  version: 0.0.27
+  resolution: "react-native-restart@npm:0.0.27"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/5226571a8c0e5bb7acebb77c58155740b09a158621ee4c7896b12f95720fb10742d4bb273ad9f01a1c8e76dd3bb6f77308f2384511e3b56274a017b4396b3ff8
   languageName: node
   linkType: hard
 

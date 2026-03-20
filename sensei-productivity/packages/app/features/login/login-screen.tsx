@@ -1,8 +1,10 @@
-import { HomeScreen } from 'app/features/home/screen'
-import { Facebook, Github } from '@tamagui/lucide-icons'
-import React from 'react'
+// import { HomeScreen } from 'app/features/home/screen'
+// import { Facebook, Github } from '@tamagui/lucide-icons'
+// import React from 'react'
 import { useState } from 'react'
-import {StyleSheet, TextInput} from 'react-native';
+import {TextInput, Alert} from 'react-native';
+import {appStorage} from "../lib/storage"
+import RNRestart from 'react-native-restart';
 import {
   Anchor,
   AnimatePresence,
@@ -17,13 +19,15 @@ import {
 } from 'tamagui'
 import { Input } from '../login/inputsParts'
 import { FormCard } from '../login/layoutParts'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SenseiProductivity } from "@aurora-interactive/sensei-productivity"
 
 export function LoginScreen() {
 	const senseiProductivity = new SenseiProductivity({})
-	const [uText, onChangeUsername] = React.useState('')
-	const [pText, onChangePassword] = React.useState('')
+	const [uText, onChangeUsername] = useState('')
+	const [pText, onChangePassword] = useState('')
   const { signIn, status } = useSignIn()
+  const safeAreaInsets = useSafeAreaInsets();
 
   function useSignIn() {
 		const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
@@ -31,11 +35,12 @@ export function LoginScreen() {
 			status: status,
 			signIn: () => {
 				setStatus('loading')
-				setTimeout(() => {
+				return new Promise(async (resolve, reject) => {
 
-					tryLogIn()
+					await tryLogIn()
  					setStatus('success')
-				}, 2000)
+          resolve(true);
+				})
 			},
 		}
 
@@ -43,21 +48,20 @@ export function LoginScreen() {
 
 	async function tryLogIn() {
 		try {
-			console.log("trying to log in now")
 			const res = await senseiProductivity.users.login({
 				username: uText,
 				password: pText,
 			})
-      console.log("Login successful!")
-			console.log(res)
+      appStorage.set("accessToken", res.accessToken);
+      RNRestart.restart();
 		}
 		catch (error){
-			console.error("Login failed. Incorrect username or password.")
+			Alert.alert("Login Failed", "Invalid username or password")
 		}
 	}
 
   return (
-    <FormCard>
+    <FormCard style={{paddingTop: safeAreaInsets.top}}>
       <View
       	p="$4"
         flexDirection="column"
@@ -92,7 +96,7 @@ export function LoginScreen() {
 							onChangeText={onChangePassword}
 							defaultValue={pText}
 						></TextInput>
-            <ForgotPasswordLink />
+            {/* <ForgotPasswordLink /> */}
           </View>
         </View>
 
@@ -126,7 +130,7 @@ export function LoginScreen() {
         >
           <Button.Text>Sign In</Button.Text>
         </Button>
-        <View flexDirection="column" gap="$3" width="100%" items="center">
+        {/* <View flexDirection="column" gap="$3" width="100%" items="center">
           <Theme>
             <View
               flexDirection="column"
@@ -140,34 +144,15 @@ export function LoginScreen() {
                 <Paragraph>Or</Paragraph>
                 <Separator />
               </View>
-              <View flexDirection="row" flexWrap="wrap" gap="$3">
-                <Button flex={1} minW="100%">
-                  <Button.Icon>
-                    <Github color="$color10" size="$1" />
-                  </Button.Icon>
-                  <Button.Text>Continue with Github</Button.Text>
-                </Button>
-                <Button flex={1}>
-                  <Button.Icon>
-                    <Facebook color="$blue10" size="$1" />
-                  </Button.Icon>
-                  <Button.Text>Continue with Facebook</Button.Text>
-                </Button>
-              </View>
             </View>
           </Theme>
-        </View>
-        <SignUpLink />
+        </View> */}
+        {/* <SignUpLink /> */}
       </View>
     </FormCard>
   )
 }
 
-
-
-
-
-// Swap for your own Link
 const Link = ({
   href,
   children,
@@ -196,19 +181,19 @@ const SignUpLink = () => {
   )
 }
 
-const ForgotPasswordLink = () => {
-  return (
-    <Anchor self="flex-end" href={`#`}>
-      <Paragraph
-        color="$color11"
-        hoverStyle={{
-          color: '$color12',
-        }}
-        size="$1"
-        mt="$1"
-      >
-        Forgot your password?
-      </Paragraph>
-    </Anchor>
-  )
-}
+// const ForgotPasswordLink = () => {
+//   return (
+//     <Anchor self="flex-end" href={`#`}>
+//       <Paragraph
+//         color="$color11"
+//         hoverStyle={{
+//           color: '$color12',
+//         }}
+//         size="$1"
+//         mt="$1"
+//       >
+//         Forgot your password?
+//       </Paragraph>
+//     </Anchor>
+//   )
+// }

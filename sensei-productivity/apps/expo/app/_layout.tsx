@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useColorScheme } from 'react-native'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
@@ -9,6 +9,8 @@ import { StatusBar } from 'expo-status-bar';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { appStorage } from "../../../packages/app/features/lib/storage.js";
+import { LoginScreen } from 'app/features/login/login-screen'
 
 
 export const unstable_settings = {
@@ -23,7 +25,7 @@ export default function App() {
   const [interLoaded, interError] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
-  })
+  });
 
   useEffect(() => {
     if (interLoaded || interError) {
@@ -36,60 +38,72 @@ export default function App() {
     return null
   }
 
-  return <RootLayoutNav />
+  return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
+  const [accessToken, setAccessToken] = useState(null);
+
+  useEffect(() => {
+    setAccessToken(appStorage.getString("accessToken"))
+  }, []);
+
+  if (accessToken === null) return null;
 
   return (
     <Provider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <StatusBar style="auto" />
 
-        <Tabs screenOptions={{ tabBarActiveTintColor: "teal", tabBarShowLabel: false}}>
+        {
+          accessToken === undefined && <LoginScreen />
+        }
+        {
+          typeof accessToken === "string" && <Tabs screenOptions={{ tabBarActiveTintColor: "teal", tabBarShowLabel: false }}>
             <Tabs.Screen
               name="index"
               options={{
-                tabBarIcon: ({color, size}) => (
-                    <MaterialCommunityIcons
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons
                     name="home"
                     size={size}
                     color={color} />
                 )
-            }}/>
+              }} />
             <Tabs.Screen name="feed"
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <MaterialCommunityIcons
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons
                     name="newspaper-variant-outline"
                     size={size}
                     color={color} />
                 )
-            }}/>
+              }} />
             <Tabs.Screen name="challenge"
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <FontAwesome6
-                      name="trophy"
-                      size={size}
-                      color={color} />
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <FontAwesome6
+                    name="trophy"
+                    size={size}
+                    color={color} />
                 )
-            }}/>
+              }} />
             <Tabs.Screen name="profile"
               options={{
-                tabBarIcon: ({color, size}) => (
-                    <FontAwesome
+                tabBarIcon: ({ color, size }) => (
+                  <FontAwesome
                     name="user-circle"
                     size={size}
                     color={color} />
                 )
-              }}/>
+              }} />
             <Tabs.Screen name="user/[id]"
-            options={{
+              options={{
                 href: null,
-            }}/>
-        </Tabs>
+              }} />
+          </Tabs>
+        }
         <NativeToast />
       </ThemeProvider>
     </Provider>
