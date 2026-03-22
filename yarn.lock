@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aurora-interactive/sensei-productivity@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@aurora-interactive/sensei-productivity/-/sensei-productivity-1.0.0.tgz#5642a354ada7f0f754056618a1e1de428f72db0c"
-  integrity sha512-Q59QfzQd/ZxdXaPZGeTDAy4DC193pia2jhl3CPl4owLcKQi1aALkfG6NhnWUIE57LlDn+Vu0b8FYVUDTlRUN5Q==
+"@aurora-interactive/sensei-productivity@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@aurora-interactive/sensei-productivity/-/sensei-productivity-1.8.0.tgz#2f03af0bcc4011efe8c8774b35c74e98fb3e9fd7"
+  integrity sha512-hFL5WPt9ow0jg9kNYudWjw8bn6DRBKetYR0g11dzMqElExytydJi6eNqFUys5oi08vbaQwEeP4SDRZ0302RLVA==
   dependencies:
     zod "^3.25.65 || ^4.0.0"
 
