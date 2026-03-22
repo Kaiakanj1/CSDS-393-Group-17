@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Avatar,
   Button,
@@ -12,8 +12,7 @@ import {
   XStack,
   YStack,
 } from '@my/ui'
-import { ToastAndroid} from 'react-native'
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Heart } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -22,7 +21,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { SenseiProductivity } from "@aurora-interactive/sensei-productivity";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-
+import { appStorage } from "../lib/storage.js"
+import { Alert } from 'react-native';
 
 type Profile = {
   userName: string
@@ -98,23 +98,61 @@ const categoryStyles = {
 
 
 export function ProfileScreen() {
-  const senseiProductivity = new SenseiProductivity({})
   const posts = mockPosts
-  const profile = mockProfile
+  const [profile, setProfile] = useState(mockProfile);
   const [canClick, setCanClick] = useState<true | false>(true)
-  const userAction = {0: "Add Friend", 64: "Remove From School", 128: "Ban User"}
-  const afterAction = {0: "Friend Request Pending", 64: "User Removed from School", 128: "User Banned"}
-  const actionToast = {0: "Friend request sent!", 64: "User removed from school!", 128: "User banned from app!"}
-  const actionIcon = {0: <FontAwesome5 name="user-plus" size={24} color="white" />,
-                      64: <FontAwesome6 name="user-xmark" size={24} color="white" />,
-                      128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />}
+  const userAction = { 0: "Add Friend", 64: "Remove From School", 128: "Ban User" }
+  const afterAction = { 0: "Friend Request Pending", 64: "User Removed from School", 128: "User Banned" }
+  const actionToast = { 0: "Friend request sent!", 64: "User removed from school!", 128: "User banned from app!" }
+  const actionIcon = {
+    0: <FontAwesome5 name="user-plus" size={24} color="white" />,
+    64: <FontAwesome6 name="user-xmark" size={24} color="white" />,
+    128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />
+  }
+  const [sdk, setSdk] = useState(new SenseiProductivity());
+  const [loading, setLoading] = useState(true);
+
   function handleAction() {
     if (canClick) {
-      //ToastAndroid.show("@" + profile.userName + ": " + actionToast[profile.userClass], ToastAndroid.SHORT)
       console.log("@" + profile.userName + ": " + actionToast[profile.userClass])
     }
     setCanClick(!canClick)
   }
+
+  useEffect(() => {
+    const fetchProfileAndSdk = async () => {
+      const accessToken = appStorage.getString("accessToken");
+      if (accessToken === undefined) {
+        Alert.alert("Somehow user has managed to be logged out despite this having been avoided in a general case! Restart the app to log in.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const sdk = new SenseiProductivity({
+          bearerAuth: `Bearer ${accessToken}`
+        });
+        setSdk(sdk);
+
+        const profile = await sdk.users.me();
+        setProfile({
+          userName: profile?.username,
+          name: `${profile.firstName} ${profile.lastName}`,
+          school: profile.schoolName,
+          userClass: 128
+        });
+      } catch (e) {
+        console.log("Failed to fetch user profile!");
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProfileAndSdk();
+  }, [])
+
+  if (loading) return null;
 
   return (
     <SafeAreaProvider>
@@ -123,34 +161,34 @@ export function ProfileScreen() {
           <YStack p="$4" gap="$4">
             <XStack items="center" justify="space-between">
               <XStack items="center" gap="$3">
-                  <Avatar circular size="$8">
-                    <Avatar.Image
-                      src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
-                        profile.name
-                      )}`}
-                    />
-                    <Avatar.Fallback bg="#DDD" />
-                  </Avatar>
-                  <YStack p="$2">
-                    <H1 size="$9" color="white">{profile.name}</H1>
-                    <XStack gap="$1">
-                      <Ionicons name="at-outline" size={24} color="white" />
-                      <Paragraph color="white">{profile.userName}</Paragraph>
-                    </XStack>
-                    <XStack gap="$2">
-                      <Ionicons name="school" size={20} color="white" />
-                      <Paragraph color="white">{profile.school}</Paragraph>
-                    </XStack>
-                  </YStack>
-                </XStack>
+                <Avatar circular size="$8">
+                  <Avatar.Image
+                    src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                      profile.name
+                    )}`}
+                  />
+                  <Avatar.Fallback bg="#DDD" />
+                </Avatar>
+                <YStack p="$2">
+                  <H1 size="$9" color="white">{profile.name}</H1>
+                  <XStack gap="$1">
+                    <Ionicons name="at-outline" size={24} color="white" />
+                    <Paragraph color="white">{profile.userName}</Paragraph>
+                  </XStack>
+                  <XStack gap="$2">
+                    <Ionicons name="school" size={20} color="white" />
+                    <Paragraph color="white">{profile.school}</Paragraph>
+                  </XStack>
+                </YStack>
+              </XStack>
             </XStack>
             <Button
-            bg={canClick ? "#EC417A" : "#888"}
-            color="white"
-            size="$4"
-            disabled={false}
-            icon={actionIcon[profile.userClass]}
-            onPress={() => { handleAction()}}>
+              bg={canClick ? "#EC417A" : "#888"}
+              color="white"
+              size="$4"
+              disabled={false}
+              icon={actionIcon[profile.userClass]}
+              onPress={() => { handleAction() }}>
               {canClick ? userAction[profile.userClass] : afterAction[profile.userClass]}
             </Button>
           </YStack>
