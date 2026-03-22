@@ -12,17 +12,19 @@ import {
   XStack,
   YStack,
 } from '@my/ui'
-import { Heart, Bell } from '@tamagui/lucide-icons'
+import { Bell } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
 import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
+import { appStorage } from "../lib/storage.js"
 
 type FeedPost = {
   id: number
   user: number
   category: string
   likes: number
-  date: Date
+  date: Date,
+  likedByCurrentUser: boolean
 }
 
 
@@ -34,6 +36,7 @@ export function FeedScreen() {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [sdk, setSdk] = useState(new SenseiProductivity());
 
   useEffect(() => {
     init()
@@ -43,29 +46,25 @@ export function FeedScreen() {
     try {
       setLoading(true)
 
-      const sdk = new SenseiProductivity()
-
-      const loginRes = await sdk.users.login({
-        username: 'Revvz',
-        password: 'Antonios12!',
-      })
-
-      console.log('login success:', loginRes)
+      const accessToken = appStorage.getString("accessToken");
+      if (accessToken === undefined) {
+        throw "User is not logged in somehow!"
+      }
 
       const authedSdk = new SenseiProductivity({
-        bearerAuth: `Bearer ${loginRes.accessToken}`,
-      })
+        bearerAuth: `Bearer ${accessToken}`
+      });
+      setSdk(authedSdk);
 
       const res = await authedSdk.users.posts.feed()
-      console.log('feed:', res)
 
-      // 4. map
       const mappedPosts: FeedPost[] = res.map((item) => ({
         id: item.postId,
         user: item.userId,
         category: item.categoryName,
         likes: item.likes,
         date: item.postDate,
+        likedByCurrentUser: item.likedByCurrentUser
       }))
 
       setPosts(mappedPosts)
@@ -139,7 +138,7 @@ export function FeedScreen() {
               <Paragraph color="red">{error}</Paragraph>
             ) : (
               filteredPosts.map((post) => (
-                <FeedCard key={post.id} post={post} />
+                <FeedCard key={post.id} post={post} sdk={sdk} />
               ))
             )}
           </YStack>
@@ -169,12 +168,31 @@ function formatDate(date: Date) {
   })
 }
 
-function FeedCard({ post }: { post: FeedPost }) {
-  const [liked, setLiked] = useState(false)
-  const [likes, setLikes] = useState(0)
-  function changeLike() {
+function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
+  const [liked, setLiked] = useState(post.likedByCurrentUser)
+  const [likes, setLikes] = useState(post.likes)
+
+  const changeLike = async () => {
+    const wasLikedBefore = liked;
     setLiked(!liked)
-    setLikes(liked ? 0 : 1)
+
+    if (!wasLikedBefore)
+      setLikes(likes => liked ? likes - 1 : likes + 1)
+
+    try {
+      const likeResult = await sdk.users.posts[wasLikedBefore ? "removeLike" : "like"]({
+        id: post.id
+      });
+
+      if (wasLikedBefore)
+        setLikes(likes => liked ? likes - 1 : likes + 1)
+    } catch (e) {
+      console.log("Failed to update the like status with the API!");
+      if (!wasLikedBefore)
+        setLikes(likes => liked ? likes + 1 : likes - 1)
+      setLiked(liked => !liked)
+      console.log(e);
+    }
   }
   return (
     <Theme>
@@ -210,8 +228,8 @@ function FeedCard({ post }: { post: FeedPost }) {
           <Separator />
 
           <XStack items="center" gap="$2">
-            <Button 
-              icon={!liked ? <Entypo name="heart-outlined" size={24} color="black" /> : <Entypo name="heart" size={24} color="red" /> }
+            <Button
+              icon={!liked ? <Entypo name="heart-outlined" size={24} color="black" /> : <Entypo name="heart" size={24} color="red" />}
               onPress={() => changeLike()}
             />
             <Paragraph>{likes} likes</Paragraph>
