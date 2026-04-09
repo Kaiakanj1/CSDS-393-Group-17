@@ -168,8 +168,13 @@ function DatePickerBody({ config }: { config: DatePickerProviderProps['config'] 
 }
 
 /** ------ EXAMPLE ------ */
-export function DatePickerExample() {
-  const [selectedDates, onDatesChange] = useState<Date[]>([])
+export function DatePickerExample({
+  selectedDates,
+  onDatesChange,
+}: {
+  selectedDates: Date[]
+  onDatesChange: (dates: Date[]) => void
+}) {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
