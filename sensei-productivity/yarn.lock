@@ -3751,6 +3751,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rehookify/datepicker@npm:^6.6.8":
+  version: 6.6.8
+  resolution: "@rehookify/datepicker@npm:6.6.8"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10/6d52111be2f2d7446eed2815a3ece2ab6a78a9db416cc70460bf050b28cf0dd75d83aa4ddbd986b993a835294a885035ee6b0e6fba4813f5a2f967dc65f25a54
+  languageName: node
+  linkType: hard
+
 "@rollup/pluginutils@npm:^5.1.3":
   version: 5.1.4
   resolution: "@rollup/pluginutils@npm:5.1.4"
@@ -14381,6 +14390,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-date-picker@npm:^5.0.13":
+  version: 5.0.13
+  resolution: "react-native-date-picker@npm:5.0.13"
+  peerDependencies:
+    react: ">= 17.0.1"
+    react-native: ">= 0.64.3"
+  checksum: 10/3a61bc300e005f9f0dc64bb8de10ea2aa0b53a430d259a615d7aa393d88c9b82c5967b393c0e0eb15a4d61cd210d7b529a526a92cb40645dddec822f305b7ace
+  languageName: node
+  linkType: hard
+
 "react-native-edge-to-edge@npm:1.6.0":
   version: 1.6.0
   resolution: "react-native-edge-to-edge@npm:1.6.0"
@@ -15069,6 +15088,7 @@ __metadata:
     "@aurora-interactive/sensei-productivity": "npm:1.8.0"
     "@babel/runtime": "npm:^7.24.6"
     "@biomejs/biome": "npm:^1.9.3"
+    "@rehookify/datepicker": "npm:^6.6.8"
     "@tamagui/checkbox": "npm:2.0.0-rc.16"
     "@tamagui/cli": "npm:^2.0.0-rc.16"
     "@tamagui/react-native-svg": "npm:^2.0.0-rc.16"
@@ -15076,11 +15096,13 @@ __metadata:
     burnt: "npm:^0.13.0"
     check-dependency-version-consistency: "npm:^4.1.0"
     husky: "npm:^9.1.6"
+    react-native-date-picker: "npm:^5.0.13"
     react-native-safe-area-context: "npm:5.4.0"
     turbo: "npm:^1.13.4"
     typescript: "npm:~5.8.3"
     ultra-runner: "npm:^3.10.5"
     vitest: "npm:^2.1.1"
+    zod: "npm:^4.3.6"
   languageName: unknown
   linkType: soft
 
@@ -17239,7 +17261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25.65 || ^4.0.0":
+"zod@npm:^3.25.65 || ^4.0.0, zod@npm:^4.3.6":
   version: 4.3.6
   resolution: "zod@npm:4.3.6"
   checksum: 10/25fc0f62e01b557b4644bf0b393bbaf47542ab30877c37837ea8caf314a8713d220c7d7fe51f68ffa72f0e1018ddfa34d96f1973d23033f5a2a5a9b6b9d9da01

@@ -1,21 +1,81 @@
 'use client'
-
+import { useEffect, useState } from 'react'
+import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
+import { appStorage } from '../lib/storage.js'
+import { DatePickerExample} from './DatePicker'
 import { Anchor, Button, H1, Paragraph, Separator, Sheet, SwitchThemeButton,
          useToastController, XStack, YStack, ScrollView } from '@my/ui'
 import { ChevronDown, ChevronUp, Check as CheckIcon} from '@tamagui/lucide-icons'
-import { Checkbox, Label, Theme } from 'tamagui'
+import { Checkbox, Label, Theme, Input } from 'tamagui'
 import type { CheckboxProps } from 'tamagui'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Feather from '@expo/vector-icons/Feather'
-import { useState } from 'react'
 import { View, StyleSheet, Platform } from 'react-native'
 import { useLink } from 'solito/navigation'
 import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context'
 
+type Task = {
+  id: number
+  description: string
+  category: string
+  deadline: Date
+  likedByCurrentUser: boolean
+}
 
 export function HomeScreen() {
+  const [selectedFilter, setSelectedFilter] = useState<
+      'All' | 'School' | 'Work' | 'Personal'
+    >('All')
+  
+    const [posts, setPosts] = useState<Task[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+    const [sdk, setSdk] = useState(new SenseiProductivity())
+  
+    const [showSearch, setShowSearch] = useState(false)
+    const [usernameInput, setUsernameInput] = useState('')
+    const [friendMessage, setFriendMessage] = useState('')
+  useEffect(() => {
+      init()
+    }, [])
+  
+    async function init() {
+      try {
+        setLoading(true)
+  
+        const accessToken = appStorage.getString('accessToken')
+        if (accessToken === undefined) {
+          throw 'User is not logged in somehow!'
+        }
+  
+        const authedSdk = new SenseiProductivity({
+          bearerAuth: `Bearer ${accessToken}`,
+        })
+        setSdk(authedSdk)
+  
+        const res = await authedSdk.users.activities.me()
+        console.log('me response:', res)
+  
+        const taskList = Array.isArray(res) ? res : res.data ?? res.tasks ?? []
+  
+        const mappedTasks: Task[] = taskList.map((item) => ({
+          id: item.activityId,
+          description: item.description,
+          category: item.categoryName,
+          deadline: new Date(item.deadline),
+        }))
+  
+        setPosts(mappedTasks)
+      } catch (err) {
+        console.error('Init failed:', err)
+        setError('Failed to load feed')
+      } finally {
+        setLoading(false)
+      }
+    }
+  
   return (
     <YStack
 			items="center"
@@ -60,13 +120,7 @@ export function HomeScreen() {
 					flexWrap="wrap"
 					$sm={{ position: 'relative', t: 0 }}
 				>
-          <YStack gap="$0" flex={3}>
-            <Paragraph
-							color="$color10"
-							text="center"
-            >
-              Column to the left
-            </Paragraph>
+          <YStack gap="$0" flex={1}>
           </YStack>
           <YStack gap="$0" flex={5}>
             <View style={{
@@ -92,7 +146,7 @@ export function HomeScreen() {
 						</View>
           </YStack>
         </XStack>
-			<SheetDemo />
+			<NewTaskButton />
     	</YStack>
     </YStack>
   )
@@ -125,7 +179,7 @@ function TaskCheckbox({
   )
 }
 
-function SheetDemo() {
+function NewTaskButton() {
   const toast = useToastController()
 
   const [open, setOpen] = useState(false)
@@ -142,14 +196,14 @@ function SheetDemo() {
         icon={<Feather name="edit" size={24} color="black" />}
         onPress={() => newTask()}
       >
-      	{"New Task"}
+      	New Task
       </Button>
       <Sheet
         modal
         animation="medium"
         open={open}
         onOpenChange={setOpen}
-        snapPoints={[80]}
+        snapPoints={[60]}
         position={position}
         onPositionChange={setPosition}
         dismissOnSnapToBottom
@@ -163,40 +217,54 @@ function SheetDemo() {
         <Sheet.Handle bg="$color8" />
         <Sheet.Frame
           items="center"
-          justify="center"
-          gap="$10"
+          gap="$4"
+          p="$6"
           bg="$color2"
         >
-          <XStack gap="$2">
-            <Paragraph text="center">Made by</Paragraph>
-            <Anchor
-              color="$blue10"
-              href="https://twitter.com/natebirdman"
-              target="_blank"
+          <H1 size="$9" width="100%">New Task</H1>
+          <YStack gap="$2" items="flex-start" width="100%">
+            <Label >Task Description</Label>
+            <Input size="$5" width="100%" borderWidth={2} />
+            <Label >Category</Label>
+            <XStack width="100%" gap="$3">
+              <Button width="30%" size="$6" bg="#EC417A">
+                <Ionicons name="school" size={24} color="white" />
+              </Button>
+              <Button width="30%" size="$6" bg="#54B41D">
+                <MaterialIcons name="work" size={24} color="white" />
+              </Button>
+              <Button width="30%" size="$6" bg="#886BEF">
+                <MaterialCommunityIcons name="head-heart" size={26} color="white" />
+              </Button>
+            </XStack>
+            <Label >Deadline</Label>
+            <DatePickerExample />
+          </YStack>
+          <XStack gap="$4">
+            <Button
+              size="$6"
+              color="black"
+              onPress={() => {
+                setOpen(false)
+              }}
             >
-              @natebirdman,
-            </Anchor>
-            <Anchor
-              color="$blue10"
-              href="https://github.com/tamagui/tamagui"
-              target="_blank"
-              rel="noreferrer"
+              Cancel
+            </Button>
+            <Button
+              size="$6"
+              bg="#886BEF"
+              color="white"
+              onPress={() => {
+                setOpen(false)
+                toast.show('Task created successfully!', {
+                  message: 'New task created successfully.',
+                })
+              }}
             >
-              give it a ⭐️
-            </Anchor>
+              Create Task
+            </Button>
           </XStack>
-
-          <Button
-            size="$6"
-            circular
-            icon={ChevronDown}
-            onPress={() => {
-              setOpen(false)
-              toast.show('Sheet closed!', {
-                message: 'Just showing how toast works...',
-              })
-            }}
-          />
+          
         </Sheet.Frame>
       </Sheet>
     </>
