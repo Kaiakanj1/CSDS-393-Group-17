@@ -12,7 +12,7 @@ import {
   XStack,
   YStack,
 } from '@my/ui'
-import { Bell } from '@tamagui/lucide-icons'
+import { Bell, RefreshCw } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
 import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
@@ -74,10 +74,10 @@ export function FeedScreen() {
   })
 
   useEffect(() => {
-    init()
+    loadFeed()
   }, [])
   // api connections and data fetching for the feed screen
-  async function init() {
+  async function loadFeed() {
     try {
       setLoading(true)
       // ensure the user is valid 
@@ -139,7 +139,7 @@ export function FeedScreen() {
   return (
     <YStack flex={1} bg="#404040">
       <YStack p="$4" gap="$4">
-        <XStack items="center" justify="space-between">
+                <XStack items="center" justify="space-between">
           <YStack>
             <H1 color="white">Your Feed</H1>
             <Paragraph color="$color10">
@@ -147,7 +147,13 @@ export function FeedScreen() {
             </Paragraph>
           </YStack>
 
-          {/* <Button circular size="$4" icon={<Bell color="white" size={18} />} /> */}
+          <Button
+            circular
+            size="$4"
+            onPress={loadFeed}
+            disabled={loading}
+            icon={<RefreshCw color="white" size={18} />}
+          />
         </XStack>
 
         <XStack gap="$3" flexWrap="wrap">

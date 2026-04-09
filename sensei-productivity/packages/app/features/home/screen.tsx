@@ -39,28 +39,23 @@ export function HomeScreen() {
   const [showSearch, setShowSearch] = useState(false)
   const [usernameInput, setUsernameInput] = useState('')
   const [friendMessage, setFriendMessage] = useState('')
-  useEffect(() => {
+    useEffect(() => {
     init()
   }, [])
 
-  async function init() {
+  async function loadTasks(authedSdk?: SenseiProductivity) {
     try {
       setLoading(true)
 
-      const accessToken = appStorage.getString('accessToken')
-      if (accessToken === undefined) {
-        throw 'User is not logged in somehow!'
-      }
+      const sdkToUse = authedSdk ?? sdk
+      const userInfo = await sdkToUse.users.me()
 
-      const authedSdk = new SenseiProductivity({
-        bearerAuth: `Bearer ${accessToken}`,
-      })
-      setSdk(authedSdk)
+      const res = (
+        await sdkToUse.users.activities.getAllOfUser({
+          id: userInfo.userId,
+        })
+      )?.filter((x) => x.activityStatus === 'active')
 
-      const userInfo = await authedSdk.users.me();
-      const res = (await authedSdk.users.activities.getAllOfUser({
-        id: userInfo.userId
-      }))?.filter(x => x.activityStatus === "active")
       console.log('me response:', res)
 
       const mappedTasks: Task[] = res.map((item) => ({
@@ -72,9 +67,31 @@ export function HomeScreen() {
 
       setPosts(mappedTasks)
     } catch (err) {
-      console.error('Init failed:', err)
+      console.error('Load tasks failed:', err)
       setError('Failed to load feed')
     } finally {
+      setLoading(false)
+    }
+  }
+
+  async function init() {
+    try {
+      setLoading(true)
+
+      const accessToken = appStorage.getString('accessToken')
+      if (accessToken === undefined) {
+        throw new Error('User is not logged in somehow!')
+      }
+
+      const authedSdk = new SenseiProductivity({
+        bearerAuth: `Bearer ${accessToken}`,
+      })
+
+      setSdk(authedSdk)
+      await loadTasks(authedSdk)
+    } catch (err) {
+      console.error('Init failed:', err)
+      setError('Failed to load feed')
       setLoading(false)
     }
   }
@@ -164,7 +181,7 @@ export function HomeScreen() {
             </View>
           </YStack>
         </XStack>
-        <NewTaskButton />
+       <NewTaskButton onTaskCreated={loadTasks} />
       </YStack>
     </YStack>
   )
@@ -192,31 +209,128 @@ function TaskCheckbox({
             {label}
           </Label>
         </XStack>
-        <Paragraph>Deadline: March 20, 2026</Paragraph>
+        <Paragraph>
+          Deadline: {deadline.toLocaleDateString()}
+        </Paragraph>
       </YStack>
     </Theme>
   )
 }
 
-function NewTaskButton() {
+function NewTaskButton({
+  onTaskCreated,
+}: {
+  onTaskCreated: () => Promise<void>
+}) {
   const toast = useToastController()
 
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState(0)
 
+  const [taskDescription, setTaskDescription] = useState('')
+  const [categoryName, setCategoryName] = useState<string>('')
+  const [selectedDates, setSelectedDates] = useState<Date[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  
+
+  const [sdk, setSdk] = useState(new SenseiProductivity())
+
+  function resetForm() {
+    setOpen(false)
+    setTaskDescription('')
+    setCategoryName('')
+    setSelectedDates([])
+  }
+
+  useEffect(() => {
+    initSdk()
+  }, [])
+
+  async function initSdk() {
+    try {
+      const accessToken = appStorage.getString('accessToken')
+
+      if (!accessToken) {
+        throw new Error('User is not logged in')
+      }
+
+      const authedSdk = new SenseiProductivity({
+        bearerAuth: `Bearer ${accessToken}`,
+      })
+
+      setSdk(authedSdk)
+    } catch (err) {
+      console.error('SDK init failed:', err)
+    }
+  }
+
+  async function handleCreateTask() {
+    try {
+      if (!taskDescription.trim()) {
+        Alert.alert('Please enter a task description')
+        return
+      }
+
+      if (!categoryName) {
+        Alert.alert('Please choose a category')
+        return
+      }
+
+      if (!selectedDates[0]) {
+        Alert.alert('Please select a deadline')
+        return
+      }
+
+      setSubmitting(true)
+
+      const result = await sdk.users.activities.create({
+        categoryName,
+        activityDeadline: selectedDates[0],
+        details: taskDescription,
+      })
+
+      console.log('Created task:', result)
+
+      await onTaskCreated()
+      Alert.alert('Task created successfully')
+      resetForm()
+    } catch (err: any) {
+      console.error('Error creating task:', err)
+
+      const msg = String(err?.message ?? err ?? '')
+      const looksLikeCreated =
+        msg.includes('Status 200') &&
+        msg.includes('"activityId"') &&
+        msg.includes('"categoryName"') &&
+        msg.includes('"activityDeadline"')
+
+      if (looksLikeCreated) {
+        await onTaskCreated()
+        Alert.alert('Task created successfully')
+        resetForm()
+        return
+      }
+
+      Alert.alert('Failed to create task')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   function newTask() {
-    console.log("New task open=" + open)
     setOpen(true)
   }
+
   return (
     <>
       <Button
         size="$6"
         icon={<Feather name="edit" size={24} color="black" />}
-        onPress={() => newTask()}
+        onPress={newTask}
       >
         New Task
       </Button>
+
       <Sheet
         modal
         animation="medium"
@@ -234,6 +348,7 @@ function NewTaskButton() {
           exitStyle={{ opacity: 0 }}
         />
         <Sheet.Handle bg="$color8" />
+
         <Sheet.Frame
           items="center"
           gap="$4"
@@ -241,49 +356,85 @@ function NewTaskButton() {
           bg="$color2"
         >
           <H1 size="$9" width="100%">New Task</H1>
+
           <YStack gap="$2" items="flex-start" width="100%">
-            <Label >Task Description</Label>
-            <Input size="$5" width="100%" borderWidth={2} />
-            <Label >Category</Label>
+            <Label>Task Description</Label>
+            <Input
+              size="$5"
+              width="100%"
+              borderWidth={2}
+              value={taskDescription}
+              onChangeText={setTaskDescription}
+            />
+
+            <Label>Category</Label>
             <XStack width="100%" gap="$3">
-              <Button width="30%" size="$6" bg="#EC417A">
-                <Ionicons name="school" size={24} color="white" />
+              <Button
+                width="30%"
+                size="$6"
+                bg={categoryName === 'School' ? '#EC417A' : '#F3F3F3'}
+                onPress={() => setCategoryName('School')}
+              >
+                <Ionicons
+                  name="school"
+                  size={24}
+                  color={categoryName === 'School' ? 'white' : 'black'}
+                />
               </Button>
-              <Button width="30%" size="$6" bg="#54B41D">
-                <MaterialIcons name="work" size={24} color="white" />
+
+              <Button
+                width="30%"
+                size="$6"
+                bg={categoryName === 'Professional' ? '#54B41D' : '#F3F3F3'}
+                onPress={() => setCategoryName('Professional')}
+              >
+                <MaterialIcons
+                  name="work"
+                  size={24}
+                  color={categoryName === 'Professional' ? 'white' : 'black'}
+                />
               </Button>
-              <Button width="30%" size="$6" bg="#886BEF">
-                <MaterialCommunityIcons name="head-heart" size={26} color="white" />
+
+              <Button
+                width="30%"
+                size="$6"
+                bg={categoryName === 'Personal' ? '#886BEF' : '#F3F3F3'}
+                onPress={() => setCategoryName('Personal')}
+              >
+                <MaterialCommunityIcons
+                  name="head-heart"
+                  size={26}
+                  color={categoryName === 'Personal' ? 'white' : 'black'}
+                />
               </Button>
             </XStack>
-            <Label >Deadline</Label>
-            <DatePickerExample />
+
+            <Label>Deadline</Label>
+            <DatePickerExample
+              selectedDates={selectedDates}
+              onDatesChange={setSelectedDates}
+            />
           </YStack>
+
           <XStack gap="$4">
             <Button
               size="$6"
               color="black"
-              onPress={() => {
-                setOpen(false)
-              }}
+              onPress={() => setOpen(false)}
             >
               Cancel
             </Button>
+
             <Button
               size="$6"
-              bg="#886BEF"
+              bg="#EC417A"
               color="white"
-              onPress={() => {
-                setOpen(false)
-                toast.show('Task created successfully!', {
-                  message: 'New task created successfully.',
-                })
-              }}
+              disabled={submitting}
+              onPress={handleCreateTask}
             >
-              Create Task
+              {submitting ? 'Creating...' : 'Create Task'}
             </Button>
           </XStack>
-
         </Sheet.Frame>
       </Sheet>
     </>
