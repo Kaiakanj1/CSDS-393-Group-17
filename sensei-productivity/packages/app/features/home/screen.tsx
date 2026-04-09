@@ -57,7 +57,10 @@ export function HomeScreen() {
       })
       setSdk(authedSdk)
 
-      const res = (await authedSdk.users.activities.me())?.filter(x => x.activityStatus === "active")
+      const userInfo = await authedSdk.users.me();
+      const res = (await authedSdk.users.activities.getAllOfUser({
+        id: userInfo.userId
+      }))?.filter(x => x.activityStatus === "active")
       console.log('me response:', res)
 
       const mappedTasks: Task[] = res.map((item) => ({
