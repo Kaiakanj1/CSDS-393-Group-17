@@ -372,26 +372,26 @@ function NewTaskButton({
               <Button
                 width="30%"
                 size="$6"
-                bg={categoryName === 'Academic' ? '#EC417A' : '#F3F3F3'}
-                onPress={() => setCategoryName('Academic')}
+                bg={categoryName === 'School' ? '#EC417A' : '#F3F3F3'}
+                onPress={() => setCategoryName('School')}
               >
                 <Ionicons
                   name="school"
                   size={24}
-                  color={categoryName === 'Academic' ? 'white' : 'black'}
+                  color={categoryName === 'School' ? 'white' : 'black'}
                 />
               </Button>
 
               <Button
                 width="30%"
                 size="$6"
-                bg={categoryName === 'Work' ? '#54B41D' : '#F3F3F3'}
-                onPress={() => setCategoryName('Work')}
+                bg={categoryName === 'Professional' ? '#54B41D' : '#F3F3F3'}
+                onPress={() => setCategoryName('Professional')}
               >
                 <MaterialIcons
                   name="work"
                   size={24}
-                  color={categoryName === 'Work' ? 'white' : 'black'}
+                  color={categoryName === 'Professional' ? 'white' : 'black'}
                 />
               </Button>
 
