@@ -24,7 +24,8 @@ type FeedPost = {
   category: string
   likes: number
   date: Date,
-  likedByCurrentUser: boolean
+  likedByCurrentUser: boolean,
+  details: string
 }
 
 
@@ -59,13 +60,32 @@ export function FeedScreen() {
       const res = await authedSdk.users.posts.feed()
 
       // pulls from api and maps to the format needed for the feed screen
-      const mappedPosts: FeedPost[] = res.map((item) => ({
-        id: item.postId,
-        user: item.userId,
-        category: item.categoryName,
-        likes: item.likes,
-        date: item.postDate,
-        likedByCurrentUser: item.likedByCurrentUser
+      const mappedPosts: FeedPost[] = await Promise.all(res.map(async (item) => {
+        try {
+          const accessToken = appStorage.getString("accessToken");
+          const newSdk = new SenseiProductivity({
+            bearerAuth: `Bearer ${accessToken}`
+          })
+          const userInfo = await newSdk.users.get({
+            id: item.userId
+          });
+          const postInfo = await newSdk.users.posts.getByPostId({
+            id: item.postId
+          });
+
+          return {
+            id: item.postId,
+            user: userInfo.username,
+            category: item.categoryName,
+            likes: item.likes,
+            date: item.postDate,
+            likedByCurrentUser: item.likedByCurrentUser,
+            details: postInfo.caption
+          }
+        } catch (e) {
+          console.log("Failed to get user info")
+          console.log(e)
+        }
       }))
 
       setPosts(mappedPosts)
@@ -217,7 +237,7 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
             </Avatar>
 
             <YStack>
-              <Paragraph fontWeight="700">User {post.user}</Paragraph>
+              <Paragraph fontWeight="700">{post.user}</Paragraph>
               <Paragraph color="#666">Post #{post.id}</Paragraph>
             </YStack>
           </XStack>
@@ -225,6 +245,10 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
           <XStack justify="space-between" items="center">
             <Paragraph fontWeight="600">{post.category}</Paragraph>
             <Paragraph color="#666">{formatDate(post.date)}</Paragraph>
+          </XStack>
+
+          <XStack justify="space-between" items="center">
+            <Paragraph color="#666">{post.details}</Paragraph>
           </XStack>
 
           <Separator />
