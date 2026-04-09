@@ -17,6 +17,20 @@ import { Theme } from 'tamagui'
 import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from "../lib/storage.js"
+import { io } from "socket.io-client";
+
+const feedSocket = io("https://messaging.csds393-group17-rest-api.aurora-interactive.online:7654", {
+  transports: ['websocket']
+});
+
+feedSocket.on("connect", () => {
+  console.log("Connected! ID:", feedSocket.id);
+  feedSocket.emit("loginAs", "Revvz");
+});
+
+feedSocket.on("message", (data) => {
+  console.log("Received:", data);
+});
 
 type FeedPost = {
   id: number
@@ -38,6 +52,26 @@ export function FeedScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [sdk, setSdk] = useState(new SenseiProductivity());
+
+  feedSocket.on("userPost", post => {
+    setPosts(currentPosts => {
+      const newAndCurrent = [...currentPosts];
+      const target = newAndCurrent.filter(x => x.id === post.post_id);
+      if (target.length > 0) return newAndCurrent;
+
+      newAndCurrent.unshift({
+        id: post.post_id,
+        user: post.user_id,
+        category: post.category_name,
+        likes: 0,
+        date: new Date(),
+        likedByCurrentUser: false,
+        details: post.caption
+      });
+
+      return newAndCurrent;
+    });
+  })
 
   useEffect(() => {
     init()
