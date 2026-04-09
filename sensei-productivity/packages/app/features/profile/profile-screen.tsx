@@ -12,24 +12,26 @@ import {
   XStack,
   YStack,
 } from '@my/ui'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 import { Heart } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { SenseiProductivity } from "@aurora-interactive/sensei-productivity";
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { appStorage } from "../lib/storage.js"
-import { Alert } from 'react-native';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import { Alert } from 'react-native'
+import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
+import { appStorage } from '../lib/storage.js'
 
 type Profile = {
+  userId: number
   userName: string
   name: string
   school: string
   userClass: number
 }
+
 type FeedPost = {
   id: number
   user: string
@@ -40,46 +42,6 @@ type FeedPost = {
   likes: number
   time: string
 }
-
-const mockProfile: Profile = {
-  userName: 'mayac',
-  name: 'Maya Chen',
-  school: 'University of California, Berkeley',
-  userClass: 128
-}
-
-const mockPosts: FeedPost[] = [
-  {
-    id: 1,
-    user: 'Maya Chen',
-    handle: '@mayac',
-    category: 'School',
-    title: 'Locked in for midterms',
-    body: 'Finished my study plan for the week and split everything into 45-minute blocks. Actually feeling organized for once.',
-    likes: 18,
-    time: '2h ago',
-  },
-  {
-    id: 2,
-    user: 'Maya Chen',
-    handle: '@mayac',
-    category: 'Work',
-    title: 'Big productivity win today',
-    body: 'Finally wrapped up the internship application tracker and cleaned up my resume tasks. Tiny systems really do help.',
-    likes: 27,
-    time: '4h ago',
-  },
-  {
-    id: 3,
-    user: 'Maya Chen',
-    handle: '@mayac',
-    category: 'Wellness',
-    title: 'Reminder to take care of yourself too',
-    body: 'I got outside for a walk before starting homework and it made a huge difference. Romanticizing basic self-care is working.',
-    likes: 35,
-    time: '6h ago',
-  },
-]
 
 const categoryStyles = {
   School: {
@@ -94,65 +56,119 @@ const categoryStyles = {
     bg: '#886BEF',
     icon: <MaterialCommunityIcons name="head-heart" size={20} color="white" />,
   },
+} as const
+
+function mapCategory(categoryName: string): 'School' | 'Work' | 'Wellness' {
+  const lower = categoryName?.toLowerCase?.() ?? ''
+
+  if (lower.includes('school') || lower.includes('academic')) return 'School'
+  if (lower.includes('work')) return 'Work'
+  if (lower.includes('well') || lower.includes('health') || lower.includes('personal')) return 'Wellness'
+
+  return 'School'
 }
 
+function formatPostTime(dateValue: string | Date) {
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
 
 export function ProfileScreen() {
-  const posts = mockPosts
-  const [profile, setProfile] = useState(mockProfile);
-  const [canClick, setCanClick] = useState<true | false>(true)
-  const userAction = { 0: "Add Friend", 64: "Remove From School", 128: "Ban User" }
-  const afterAction = { 0: "Friend Request Pending", 64: "User Removed from School", 128: "User Banned" }
-  const actionToast = { 0: "Friend request sent!", 64: "User removed from school!", 128: "User banned from app!" }
+  const [profile, setProfile] = useState<Profile>({
+    userId: 0,
+    userName: '',
+    name: '',
+    school: '',
+    userClass: 128,
+  })
+
+  const [posts, setPosts] = useState<FeedPost[]>([])
+  const [canClick, setCanClick] = useState(true)
+  const [sdk, setSdk] = useState(new SenseiProductivity())
+  const [loading, setLoading] = useState(true)
+
+  const userAction = { 0: 'Add Friend', 64: 'Remove From School', 128: 'Ban User' } as const
+  const afterAction = { 0: 'Friend Request Pending', 64: 'User Removed from School', 128: 'User Banned' } as const
+  const actionToast = { 0: 'Friend request sent!', 64: 'User removed from school!', 128: 'User banned from app!' } as const
   const actionIcon = {
     0: <FontAwesome5 name="user-plus" size={24} color="white" />,
     64: <FontAwesome6 name="user-xmark" size={24} color="white" />,
-    128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />
-  }
-  const [sdk, setSdk] = useState(new SenseiProductivity());
-  const [loading, setLoading] = useState(true);
+    128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />,
+  } as const
 
   function handleAction() {
     if (canClick) {
-      console.log("@" + profile.userName + ": " + actionToast[profile.userClass])
+      console.log('@' + profile.userName + ': ' + actionToast[profile.userClass])
     }
     setCanClick(!canClick)
   }
 
   useEffect(() => {
-    const fetchProfileAndSdk = async () => {
-      const accessToken = appStorage.getString("accessToken");
+    const fetchProfileAndPosts = async () => {
+      const accessToken = appStorage.getString('accessToken')
+
       if (accessToken === undefined) {
-        Alert.alert("Somehow user has managed to be logged out despite this having been avoided in a general case! Restart the app to log in.");
-        setLoading(false);
-        return;
+        Alert.alert(
+          'Somehow user has managed to be logged out despite this having been avoided in a general case! Restart the app to log in.'
+        )
+        setLoading(false)
+        return
       }
 
       try {
-        const sdk = new SenseiProductivity({
-          bearerAuth: `Bearer ${accessToken}`
-        });
-        setSdk(sdk);
+        const authedSdk = new SenseiProductivity({
+          bearerAuth: `Bearer ${accessToken}`,
+        })
+        setSdk(authedSdk)
 
-        const profile = await sdk.users.me();
-        setProfile({
-          userName: profile?.username,
-          name: `${profile.firstName} ${profile.lastName}`,
-          school: profile.schoolName,
-          userClass: 128
-        });
+        const me = await authedSdk.users.me()
+
+        const nextProfile: Profile = {
+          userId: me.userId,
+          userName: me.username,
+          name: `${me.firstName} ${me.lastName}`,
+          school: me.schoolName,
+          userClass: 128,
+        }
+
+        setProfile(nextProfile)
+
+        const userPosts = await authedSdk.users.posts.getByUserId({
+          id: me.userId,
+        })
+
+        const mappedPosts: FeedPost[] = userPosts.map((item: any) => ({
+          id: item.postId,
+          user: nextProfile.name,
+          handle: `@${nextProfile.userName}`,
+          category: mapCategory(item.categoryName),
+          title: item.title ?? item.categoryName ?? 'Post',
+          body: item.details ?? item.caption ?? item.body ?? '',
+          likes: item.likes ?? 0,
+          time: formatPostTime(item.postDate),
+        }))
+
+        setPosts(mappedPosts)
       } catch (e) {
-        console.log("Failed to fetch user profile!");
-        console.log(e);
+        console.log('Failed to fetch user profile or posts!')
+        console.log(e)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchProfileAndSdk();
+    fetchProfileAndPosts()
   }, [])
 
-  if (loading) return null;
+  if (loading) return null
 
   return (
     <SafeAreaProvider>
@@ -163,18 +179,21 @@ export function ProfileScreen() {
               <XStack items="center" gap="$3">
                 <Avatar circular size="$8">
                   <Avatar.Image
-                    src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
-                      profile.name
-                    )}`}
+                    src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(profile.name)}`}
                   />
                   <Avatar.Fallback bg="#DDD" />
                 </Avatar>
+
                 <YStack p="$2">
-                  <H1 size="$9" color="white">{profile.name}</H1>
+                  <H1 size="$9" color="white">
+                    {profile.name}
+                  </H1>
+
                   <XStack gap="$1">
                     <Ionicons name="at-outline" size={24} color="white" />
                     <Paragraph color="white">{profile.userName}</Paragraph>
                   </XStack>
+
                   <XStack gap="$2">
                     <Ionicons name="school" size={20} color="white" />
                     <Paragraph color="white">{profile.school}</Paragraph>
@@ -182,13 +201,15 @@ export function ProfileScreen() {
                 </YStack>
               </XStack>
             </XStack>
+
             <Button
-              bg={canClick ? "#EC417A" : "#888"}
+              bg={canClick ? '#EC417A' : '#888'}
               color="white"
               size="$4"
               disabled={false}
               icon={actionIcon[profile.userClass]}
-              onPress={() => { handleAction() }}>
+              onPress={handleAction}
+            >
               {canClick ? userAction[profile.userClass] : afterAction[profile.userClass]}
             </Button>
           </YStack>
@@ -202,10 +223,15 @@ export function ProfileScreen() {
           >
             <ScrollView showsVerticalScrollIndicator={false}>
               <YStack p="$4" gap="$4">
-                <Paragraph p="$2" fontWeight="700">Posts by {profile.name}</Paragraph>
-                {posts.map((post) => (
-                  <FeedCard key={post.id} post={post} />
-                ))}
+                <Paragraph p="$2" fontWeight="700">
+                  Posts by {profile.name}
+                </Paragraph>
+
+                {posts.length === 0 ? (
+                  <Paragraph color="#666">No posts found.</Paragraph>
+                ) : (
+                  posts.map((post) => <FeedCard key={post.id} post={post} />)
+                )}
               </YStack>
             </ScrollView>
           </YStack>
@@ -234,9 +260,7 @@ function FeedCard({ post }: { post: FeedPost }) {
           <XStack items="center" gap="$3">
             <Avatar circular size="$4">
               <Avatar.Image
-                src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
-                  post.user
-                )}`}
+                src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(post.user)}`}
               />
               <Avatar.Fallback bg="#DDD" />
             </Avatar>
@@ -245,6 +269,21 @@ function FeedCard({ post }: { post: FeedPost }) {
               <Paragraph fontWeight="700">{post.user}</Paragraph>
               <Paragraph color="#1A1A1A">{post.handle}</Paragraph>
             </YStack>
+          </XStack>
+
+          <XStack items="center" gap="$2">
+            <YStack
+              width={28}
+              height={28}
+              borderRadius={999}
+              items="center"
+              justify="center"
+              bg={category.bg}
+            >
+              {category.icon}
+            </YStack>
+            <Paragraph fontWeight="600">{post.category}</Paragraph>
+            <Paragraph color="#777">• {post.time}</Paragraph>
           </XStack>
 
           <YStack gap="$2">
@@ -258,7 +297,6 @@ function FeedCard({ post }: { post: FeedPost }) {
             <XStack gap="$4">
               <ActionButton icon={<Heart size={18} />} text={post.likes} />
             </XStack>
-
           </XStack>
         </YStack>
       </YStack>
