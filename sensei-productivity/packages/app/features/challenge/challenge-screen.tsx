@@ -1,12 +1,15 @@
 'use client'
 
-import { Button, H1, H2, Paragraph, XStack, YStack, ScrollView } from '@my/ui'
+import { useState } from 'react'
+import { Button, H2, Paragraph, XStack, YStack, ScrollView } from '@my/ui'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import Feather from '@expo/vector-icons/Feather'
 import { View } from 'react-native'
 
 export function ChallengeAdminScreen() {
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+
   const challenge = {
     title: 'Midterm Study Challenge',
     school: 'Case Western Reserve University',
@@ -17,6 +20,13 @@ export function ChallengeAdminScreen() {
     totalParticipants: 420,
   }
 
+  const topSchools = [
+    { rank: 1, school: 'Case Western Reserve University', points: 1280 },
+    { rank: 2, school: 'Ohio State University', points: 1215 },
+    { rank: 3, school: 'University of Michigan', points: 1170 },
+  //  { rank: 4, school: 'Carnegie Mellon University', points: 1110 },
+  //  { rank: 5, school: 'Purdue University', points: 1055 },
+  ]
 
   const recentActivity = [
     { name: 'Alyssa P.', action: 'completed the challenge', time: '10 min ago' },
@@ -33,6 +43,43 @@ export function ChallengeAdminScreen() {
           {challenge.school} · School Admin View
         </Paragraph>
       </YStack>
+
+      <XStack justify="flex-end">
+        <Button
+          backgroundColor="#EC417A"
+          color="white"
+          borderRadius={12}
+          onPress={() => setShowLeaderboard(!showLeaderboard)}
+        >
+          {showLeaderboard ? 'Hide Leaderboard' : 'Leaderboard'}
+        </Button>
+      </XStack>
+
+      {showLeaderboard && (
+        <DashboardCard title="Top Schools by Challenge Points">
+          <YStack gap="$3">
+            {topSchools.map((item) => (
+              <View
+                key={item.rank}
+                style={{
+                  backgroundColor: '#F7F7F7',
+                  borderRadius: 12,
+                  padding: 12,
+                }}
+              >
+                <XStack justify="space-between" items="center">
+                  <Paragraph fontWeight="700">
+                    #{item.rank} {item.school}
+                  </Paragraph>
+                  <Paragraph color="#EC417A" fontWeight="700">
+                    {item.points} pts
+                  </Paragraph>
+                </XStack>
+              </View>
+            ))}
+          </YStack>
+        </DashboardCard>
+      )}
 
       <View
         style={{
@@ -119,9 +166,6 @@ export function ChallengeAdminScreen() {
                 ))}
               </YStack>
             </DashboardCard>
-          </XStack>
-
-          <XStack gap="$3" justify="center" flexWrap="wrap">
           </XStack>
         </YStack>
       </ScrollView>

@@ -41,11 +41,11 @@ export function FeedScreen() {
   useEffect(() => {
     init()
   }, [])
-
+  // api connections and data fetching for the feed screen
   async function init() {
     try {
       setLoading(true)
-
+      // ensure the user is valid 
       const accessToken = appStorage.getString("accessToken");
       if (accessToken === undefined) {
         throw "User is not logged in somehow!"
@@ -58,6 +58,7 @@ export function FeedScreen() {
 
       const res = await authedSdk.users.posts.feed()
 
+      // pulls from api and maps to the format needed for the feed screen
       const mappedPosts: FeedPost[] = res.map((item) => ({
         id: item.postId,
         user: item.userId,
@@ -92,7 +93,7 @@ export function FeedScreen() {
             </Paragraph>
           </YStack>
 
-          <Button circular size="$4" icon={<Bell color="white" size={18} />} />
+          {/* <Button circular size="$4" icon={<Bell color="white" size={18} />} /> */}
         </XStack>
 
         <XStack gap="$3" flexWrap="wrap">
@@ -172,6 +173,7 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
   const [liked, setLiked] = useState(post.likedByCurrentUser)
   const [likes, setLikes] = useState(post.likes)
 
+  // updates the like status of a post, optimistically updating the UI and then confirming with the API. If the API call fails, it rolls back the optimistic update and shows an error in the console.
   const changeLike = async () => {
     const wasLikedBefore = liked;
     setLiked(!liked)
