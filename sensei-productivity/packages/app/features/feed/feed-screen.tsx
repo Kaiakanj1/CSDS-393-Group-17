@@ -5,31 +5,28 @@ import {
   Avatar,
   Button,
   H1,
+  H3,
   Paragraph,
   ScrollView,
   Separator,
   XStack,
   YStack,
-  Input,
-  Input,
 } from '@my/ui'
 import { Bell } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
-import Entypo from '@expo/vector-icons/Entypo'
-import Entypo from '@expo/vector-icons/Entypo'
+import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
-import { appStorage } from '../lib/storage.js'
-import { appStorage } from '../lib/storage.js'
+import { appStorage } from "../lib/storage.js"
 
 type FeedPost = {
   id: number
   user: number
   category: string
   likes: number
-  date: Date
-  date: Date
+  date: Date,
   likedByCurrentUser: boolean
 }
+
 
 export function FeedScreen() {
   const [selectedFilter, setSelectedFilter] = useState<
@@ -39,59 +36,36 @@ export function FeedScreen() {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [sdk, setSdk] = useState(new SenseiProductivity())
-
-  const [showSearch, setShowSearch] = useState(false)
-  const [usernameInput, setUsernameInput] = useState('')
-  const [friendMessage, setFriendMessage] = useState('')
-  const [sdk, setSdk] = useState(new SenseiProductivity())
-
-  const [showSearch, setShowSearch] = useState(false)
-  const [usernameInput, setUsernameInput] = useState('')
-  const [friendMessage, setFriendMessage] = useState('')
+  const [sdk, setSdk] = useState(new SenseiProductivity());
 
   useEffect(() => {
     init()
   }, [])
-
+  // api connections and data fetching for the feed screen
   async function init() {
     try {
       setLoading(true)
-
-      const accessToken = appStorage.getString('accessToken')
-
-      const accessToken = appStorage.getString('accessToken')
+      // ensure the user is valid 
+      const accessToken = appStorage.getString("accessToken");
       if (accessToken === undefined) {
-        throw 'User is not logged in somehow!'
-        throw 'User is not logged in somehow!'
+        throw "User is not logged in somehow!"
       }
 
       const authedSdk = new SenseiProductivity({
-        bearerAuth: `Bearer ${accessToken}`,
-      })
-      setSdk(authedSdk)
-        bearerAuth: `Bearer ${accessToken}`,
-      })
-      setSdk(authedSdk)
+        bearerAuth: `Bearer ${accessToken}`
+      });
+      setSdk(authedSdk);
 
       const res = await authedSdk.users.posts.feed()
-      console.log('feed response:', res)
 
-      const posts = Array.isArray(res) ? res : res.data ?? res.posts ?? []
-      console.log('feed response:', res)
-
-      const posts = Array.isArray(res) ? res : res.data ?? res.posts ?? []
-
-      const mappedPosts: FeedPost[] = posts.map((item) => ({
-      const mappedPosts: FeedPost[] = posts.map((item) => ({
+      // pulls from api and maps to the format needed for the feed screen
+      const mappedPosts: FeedPost[] = res.map((item) => ({
         id: item.postId,
         user: item.userId,
         category: item.categoryName,
         likes: item.likes,
-        date: new Date(item.postDate),
-        likedByCurrentUser: true,
-        date: new Date(item.postDate),
-        likedByCurrentUser: true,
+        date: item.postDate,
+        likedByCurrentUser: item.likedByCurrentUser
       }))
 
       setPosts(mappedPosts)
@@ -101,30 +75,6 @@ export function FeedScreen() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleAddFriend = () => {
-    if (!usernameInput.trim()) return
-
-    setFriendMessage('Friend Added')
-    setUsernameInput('')
-
-    setTimeout(() => {
-      setFriendMessage('')
-      setShowSearch(false)
-    }, 1500)
-  }
-
-  const handleAddFriend = () => {
-    if (!usernameInput.trim()) return
-
-    setFriendMessage('Friend Added')
-    setUsernameInput('')
-
-    setTimeout(() => {
-      setFriendMessage('')
-      setShowSearch(false)
-    }, 1500)
   }
 
   const filteredPosts =
@@ -143,87 +93,8 @@ export function FeedScreen() {
             </Paragraph>
           </YStack>
 
-          <XStack gap="$2">
-            <Button
-              size="$3"
-              bg="#666"
-              color="white"
-              onPress={() => {
-                setShowSearch((prev) => !prev)
-                setFriendMessage('')
-              }}
-            >
-              Search
-            </Button>
-
-            <Button circular size="$4" icon={<Bell color="white" size={18} />} />
-          </XStack>
-          <XStack gap="$2">
-            <Button
-              size="$3"
-              bg="#666"
-              color="white"
-              onPress={() => {
-                setShowSearch((prev) => !prev)
-                setFriendMessage('')
-              }}
-            >
-              Search
-            </Button>
-
-            <Button circular size="$4" icon={<Bell color="white" size={18} />} />
-          </XStack>
+          {/* <Button circular size="$4" icon={<Bell color="white" size={18} />} /> */}
         </XStack>
-
-        {showSearch && (
-          <YStack
-            bg="white"
-            p="$3"
-            borderRadius={12}
-            gap="$2"
-            maxWidth={220}
-          >
-            <Input
-              size="$2"
-              placeholder="Enter username"
-              value={usernameInput}
-              onChangeText={setUsernameInput}
-            />
-
-            <Button size="$2" onPress={handleAddFriend}>
-              Add
-            </Button>
-
-            {friendMessage ? (
-              <Paragraph color="green">{friendMessage}</Paragraph>
-            ) : null}
-          </YStack>
-        )}
-
-        {showSearch && (
-          <YStack
-            bg="white"
-            p="$3"
-            borderRadius={12}
-            gap="$2"
-            maxWidth={220}
-          >
-            <Input
-              size="$2"
-              placeholder="Enter username"
-              value={usernameInput}
-              onChangeText={setUsernameInput}
-            />
-
-            <Button size="$2" onPress={handleAddFriend}>
-              Add
-            </Button>
-
-            {friendMessage ? (
-              <Paragraph color="green">{friendMessage}</Paragraph>
-            ) : null}
-          </YStack>
-        )}
 
         <XStack gap="$3" flexWrap="wrap">
           <FilterChip
@@ -278,6 +149,18 @@ export function FeedScreen() {
   )
 }
 
+function mapCategory(category: string): 'School' | 'Work' | 'Personal' {
+  if (!category) return 'School'
+
+  const lower = category.toLowerCase()
+
+  if (lower.includes('school')) return 'School'
+  if (lower.includes('work')) return 'Work'
+  if (lower.includes('personal')) return 'Personal'
+
+  return 'School'
+}
+
 function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -286,54 +169,33 @@ function formatDate(date: Date) {
   })
 }
 
-function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
-function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
+function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
   const [liked, setLiked] = useState(post.likedByCurrentUser)
   const [likes, setLikes] = useState(post.likes)
 
+  // updates the like status of a post, optimistically updating the UI and then confirming with the API. If the API call fails, it rolls back the optimistic update and shows an error in the console.
   const changeLike = async () => {
-    const wasLikedBefore = liked
-    const wasLikedBefore = liked
+    const wasLikedBefore = liked;
     setLiked(!liked)
 
-    if (!wasLikedBefore) {
-      setLikes((likes) => (liked ? likes - 1 : likes + 1))
-    }
-    if (!wasLikedBefore) {
-      setLikes((likes) => (liked ? likes - 1 : likes + 1))
-    }
+    if (!wasLikedBefore)
+      setLikes(likes => liked ? likes - 1 : likes + 1)
 
     try {
-      await sdk.users.posts[wasLikedBefore ? 'removeLike' : 'like']({
-        id: post.id,
-      })
-      await sdk.users.posts[wasLikedBefore ? 'removeLike' : 'like']({
-        id: post.id,
-      })
+      const likeResult = await sdk.users.posts[wasLikedBefore ? "removeLike" : "like"]({
+        id: post.id
+      });
 
-      if (wasLikedBefore) {
-        setLikes((likes) => (liked ? likes - 1 : likes + 1))
-      }
-      if (wasLikedBefore) {
-        setLikes((likes) => (liked ? likes - 1 : likes + 1))
-      }
+      if (wasLikedBefore)
+        setLikes(likes => liked ? likes - 1 : likes + 1)
     } catch (e) {
-      console.log('Failed to update the like status with the API!')
-      if (!wasLikedBefore) {
-        setLikes((likes) => (liked ? likes + 1 : likes - 1))
-      }
-      setLiked((liked) => !liked)
-      console.log(e)
-      console.log('Failed to update the like status with the API!')
-      if (!wasLikedBefore) {
-        setLikes((likes) => (liked ? likes + 1 : likes - 1))
-      }
-      setLiked((liked) => !liked)
-      console.log(e)
+      console.log("Failed to update the like status with the API!");
+      if (!wasLikedBefore)
+        setLikes(likes => liked ? likes + 1 : likes - 1)
+      setLiked(liked => !liked)
+      console.log(e);
     }
   }
-
-
   return (
     <Theme>
       <YStack
@@ -369,20 +231,7 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
 
           <XStack items="center" gap="$2">
             <Button
-              icon={
-                !liked ? (
-                  <Entypo name="heart-outlined" size={24} color="black" />
-                ) : (
-                  <Entypo name="heart" size={24} color="red" />
-                )
-              }
-              icon={
-                !liked ? (
-                  <Entypo name="heart-outlined" size={24} color="black" />
-                ) : (
-                  <Entypo name="heart" size={24} color="red" />
-                )
-              }
+              icon={!liked ? <Entypo name="heart-outlined" size={24} color="black" /> : <Entypo name="heart" size={24} color="red" />}
               onPress={() => changeLike()}
             />
             <Paragraph>{likes} likes</Paragraph>
@@ -392,8 +241,6 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
     </Theme>
   )
 }
-
-
 function FilterChip({
   label,
   active,
@@ -419,5 +266,20 @@ function FilterChip({
     >
       {label}
     </Button>
+  )
+}
+
+function ActionButton({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode
+  text: number
+}) {
+  return (
+    <XStack gap="$2" items="center">
+      {icon}
+      <Paragraph>{text}</Paragraph>
+    </XStack>
   )
 }
