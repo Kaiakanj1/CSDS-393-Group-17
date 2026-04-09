@@ -11,11 +11,14 @@ import {
   XStack,
   YStack,
   Input,
+  Input,
 } from '@my/ui'
 import { Bell } from '@tamagui/lucide-icons'
 import { Theme } from 'tamagui'
 import Entypo from '@expo/vector-icons/Entypo'
+import Entypo from '@expo/vector-icons/Entypo'
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
+import { appStorage } from '../lib/storage.js'
 import { appStorage } from '../lib/storage.js'
 
 type FeedPost = {
@@ -23,6 +26,7 @@ type FeedPost = {
   user: number
   category: string
   likes: number
+  date: Date
   date: Date
   likedByCurrentUser: boolean
 }
@@ -40,6 +44,11 @@ export function FeedScreen() {
   const [showSearch, setShowSearch] = useState(false)
   const [usernameInput, setUsernameInput] = useState('')
   const [friendMessage, setFriendMessage] = useState('')
+  const [sdk, setSdk] = useState(new SenseiProductivity())
+
+  const [showSearch, setShowSearch] = useState(false)
+  const [usernameInput, setUsernameInput] = useState('')
+  const [friendMessage, setFriendMessage] = useState('')
 
   useEffect(() => {
     init()
@@ -50,11 +59,17 @@ export function FeedScreen() {
       setLoading(true)
 
       const accessToken = appStorage.getString('accessToken')
+
+      const accessToken = appStorage.getString('accessToken')
       if (accessToken === undefined) {
+        throw 'User is not logged in somehow!'
         throw 'User is not logged in somehow!'
       }
 
       const authedSdk = new SenseiProductivity({
+        bearerAuth: `Bearer ${accessToken}`,
+      })
+      setSdk(authedSdk)
         bearerAuth: `Bearer ${accessToken}`,
       })
       setSdk(authedSdk)
@@ -63,12 +78,18 @@ export function FeedScreen() {
       console.log('feed response:', res)
 
       const posts = Array.isArray(res) ? res : res.data ?? res.posts ?? []
+      console.log('feed response:', res)
 
+      const posts = Array.isArray(res) ? res : res.data ?? res.posts ?? []
+
+      const mappedPosts: FeedPost[] = posts.map((item) => ({
       const mappedPosts: FeedPost[] = posts.map((item) => ({
         id: item.postId,
         user: item.userId,
         category: item.categoryName,
         likes: item.likes,
+        date: new Date(item.postDate),
+        likedByCurrentUser: true,
         date: new Date(item.postDate),
         likedByCurrentUser: true,
       }))
@@ -80,6 +101,18 @@ export function FeedScreen() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleAddFriend = () => {
+    if (!usernameInput.trim()) return
+
+    setFriendMessage('Friend Added')
+    setUsernameInput('')
+
+    setTimeout(() => {
+      setFriendMessage('')
+      setShowSearch(false)
+    }, 1500)
   }
 
   const handleAddFriend = () => {
@@ -125,7 +158,47 @@ export function FeedScreen() {
 
             <Button circular size="$4" icon={<Bell color="white" size={18} />} />
           </XStack>
+          <XStack gap="$2">
+            <Button
+              size="$3"
+              bg="#666"
+              color="white"
+              onPress={() => {
+                setShowSearch((prev) => !prev)
+                setFriendMessage('')
+              }}
+            >
+              Search
+            </Button>
+
+            <Button circular size="$4" icon={<Bell color="white" size={18} />} />
+          </XStack>
         </XStack>
+
+        {showSearch && (
+          <YStack
+            bg="white"
+            p="$3"
+            borderRadius={12}
+            gap="$2"
+            maxWidth={220}
+          >
+            <Input
+              size="$2"
+              placeholder="Enter username"
+              value={usernameInput}
+              onChangeText={setUsernameInput}
+            />
+
+            <Button size="$2" onPress={handleAddFriend}>
+              Add
+            </Button>
+
+            {friendMessage ? (
+              <Paragraph color="green">{friendMessage}</Paragraph>
+            ) : null}
+          </YStack>
+        )}
 
         {showSearch && (
           <YStack
@@ -214,13 +287,18 @@ function formatDate(date: Date) {
 }
 
 function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
+function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
   const [liked, setLiked] = useState(post.likedByCurrentUser)
   const [likes, setLikes] = useState(post.likes)
 
   const changeLike = async () => {
     const wasLikedBefore = liked
+    const wasLikedBefore = liked
     setLiked(!liked)
 
+    if (!wasLikedBefore) {
+      setLikes((likes) => (liked ? likes - 1 : likes + 1))
+    }
     if (!wasLikedBefore) {
       setLikes((likes) => (liked ? likes - 1 : likes + 1))
     }
@@ -229,7 +307,13 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
       await sdk.users.posts[wasLikedBefore ? 'removeLike' : 'like']({
         id: post.id,
       })
+      await sdk.users.posts[wasLikedBefore ? 'removeLike' : 'like']({
+        id: post.id,
+      })
 
+      if (wasLikedBefore) {
+        setLikes((likes) => (liked ? likes - 1 : likes + 1))
+      }
       if (wasLikedBefore) {
         setLikes((likes) => (liked ? likes - 1 : likes + 1))
       }
@@ -240,8 +324,15 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
       }
       setLiked((liked) => !liked)
       console.log(e)
+      console.log('Failed to update the like status with the API!')
+      if (!wasLikedBefore) {
+        setLikes((likes) => (liked ? likes + 1 : likes - 1))
+      }
+      setLiked((liked) => !liked)
+      console.log(e)
     }
   }
+
 
   return (
     <Theme>
@@ -285,6 +376,13 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
                   <Entypo name="heart" size={24} color="red" />
                 )
               }
+              icon={
+                !liked ? (
+                  <Entypo name="heart-outlined" size={24} color="black" />
+                ) : (
+                  <Entypo name="heart" size={24} color="red" />
+                )
+              }
               onPress={() => changeLike()}
             />
             <Paragraph>{likes} likes</Paragraph>
@@ -294,6 +392,7 @@ function FeedCard({ post, sdk }: { post: FeedPost; sdk: SenseiProductivity }) {
     </Theme>
   )
 }
+
 
 function FilterChip({
   label,
