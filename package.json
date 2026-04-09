@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aurora-interactive/sensei-productivity": "^1.8.0"
+    "@aurora-interactive/sensei-productivity": "^1.8.0",
     "@tamagui/card": "^2.0.0-rc.13",
     "@tamagui/checkbox": "^2.0.0-rc.16",
     "@tamagui/scroll-view": "^2.0.0-rc.13"
