@@ -17,6 +17,20 @@ import { Theme } from 'tamagui'
 import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from "../lib/storage.js"
+import { io } from "socket.io-client";
+
+const feedSocket = io("https://messaging.csds393-group17-rest-api.aurora-interactive.online:7654", {
+  transports: ['websocket']
+});
+
+feedSocket.on("connect", () => {
+  console.log("Connected! ID:", feedSocket.id);
+  feedSocket.emit("loginAs", "Revvz");
+});
+
+feedSocket.on("message", (data) => {
+  console.log("Received:", data);
+});
 
 type FeedPost = {
   id: number
@@ -24,7 +38,8 @@ type FeedPost = {
   category: string
   likes: number
   date: Date,
-  likedByCurrentUser: boolean
+  likedByCurrentUser: boolean,
+  details: string
 }
 
 
@@ -37,6 +52,26 @@ export function FeedScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [sdk, setSdk] = useState(new SenseiProductivity());
+
+  feedSocket.on("userPost", post => {
+    setPosts(currentPosts => {
+      const newAndCurrent = [...currentPosts];
+      const target = newAndCurrent.filter(x => x.id === post.post_id);
+      if (target.length > 0) return newAndCurrent;
+
+      newAndCurrent.unshift({
+        id: post.post_id,
+        user: post.user_id,
+        category: post.category_name,
+        likes: 0,
+        date: new Date(),
+        likedByCurrentUser: false,
+        details: post.caption
+      });
+
+      return newAndCurrent;
+    });
+  })
 
   useEffect(() => {
     init()
@@ -59,13 +94,32 @@ export function FeedScreen() {
       const res = await authedSdk.users.posts.feed()
 
       // pulls from api and maps to the format needed for the feed screen
-      const mappedPosts: FeedPost[] = res.map((item) => ({
-        id: item.postId,
-        user: item.userId,
-        category: item.categoryName,
-        likes: item.likes,
-        date: item.postDate,
-        likedByCurrentUser: item.likedByCurrentUser
+      const mappedPosts: FeedPost[] = await Promise.all(res.map(async (item) => {
+        try {
+          const accessToken = appStorage.getString("accessToken");
+          const newSdk = new SenseiProductivity({
+            bearerAuth: `Bearer ${accessToken}`
+          })
+          const userInfo = await newSdk.users.get({
+            id: item.userId
+          });
+          const postInfo = await newSdk.users.posts.getByPostId({
+            id: item.postId
+          });
+
+          return {
+            id: item.postId,
+            user: userInfo.username,
+            category: item.categoryName,
+            likes: item.likes,
+            date: item.postDate,
+            likedByCurrentUser: item.likedByCurrentUser,
+            details: postInfo.caption
+          }
+        } catch (e) {
+          console.log("Failed to get user info")
+          console.log(e)
+        }
       }))
 
       setPosts(mappedPosts)
@@ -217,7 +271,7 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
             </Avatar>
 
             <YStack>
-              <Paragraph fontWeight="700">User {post.user}</Paragraph>
+              <Paragraph fontWeight="700">{post.user}</Paragraph>
               <Paragraph color="#666">Post #{post.id}</Paragraph>
             </YStack>
           </XStack>
@@ -225,6 +279,10 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
           <XStack justify="space-between" items="center">
             <Paragraph fontWeight="600">{post.category}</Paragraph>
             <Paragraph color="#666">{formatDate(post.date)}</Paragraph>
+          </XStack>
+
+          <XStack justify="space-between" items="center">
+            <Paragraph color="#666">{post.details}</Paragraph>
           </XStack>
 
           <Separator />
