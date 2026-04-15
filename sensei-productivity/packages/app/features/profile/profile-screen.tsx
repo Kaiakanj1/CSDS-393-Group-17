@@ -23,6 +23,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { Alert } from 'react-native'
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from '../lib/storage.js'
+import { mapCategory, formatPostTime } from '../../utils/profileHelpers'
 
 type Profile = {
   userId: number
@@ -58,28 +59,32 @@ const categoryStyles = {
   },
 } as const
 
-function mapCategory(categoryName: string): 'School' | 'Work' | 'Wellness' {
-  const lower = categoryName?.toLowerCase?.() ?? ''
+// now in a helper function since it's also used in the feed screen
 
-  if (lower.includes('school') || lower.includes('academic')) return 'School'
-  if (lower.includes('work')) return 'Work'
-  if (lower.includes('well') || lower.includes('health') || lower.includes('personal')) return 'Wellness'
+// function mapCategory(categoryName: string): 'School' | 'Work' | 'Wellness' {
+//   const lower = categoryName?.toLowerCase?.() ?? ''
 
-  return 'School'
-}
+//   if (lower.includes('school') || lower.includes('academic')) return 'School'
+//   if (lower.includes('work')) return 'Work'
+//   if (lower.includes('well') || lower.includes('health') || lower.includes('personal')) return 'Wellness'
 
-function formatPostTime(dateValue: string | Date) {
-  const date = new Date(dateValue)
-  if (Number.isNaN(date.getTime())) return ''
+//   return 'School'
+// }
 
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-}
+// now in a helper function since it's also used in the feed screen
+
+// function formatPostTime(dateValue: string | Date) {
+//   const date = new Date(dateValue)
+//   if (Number.isNaN(date.getTime())) return ''
+
+//   return date.toLocaleString(undefined, {
+//     year: 'numeric',
+//     month: 'short',
+//     day: 'numeric',
+//     hour: 'numeric',
+//     minute: '2-digit',
+//   })
+// }
 
 export function ProfileScreen() {
   const [profile, setProfile] = useState<Profile>({
