@@ -316,12 +316,12 @@ export function ChallengeAdminScreen() {
 
     setSdk(authedSdk)
 
-    const res = await authedSdk.schools.getAll()
+    const res = await authedSdk.schools.leaderboard();
 
     const mappedSchools = res
       .map((item: any) => ({
         school: item.schoolName,
-        points: item.challengePoints ?? 0
+        points: item.points ?? 0
       }))
       .sort((a, b) => b.points - a.points)
       .slice(0, 5)
@@ -393,14 +393,14 @@ export function ChallengeAdminScreen() {
             <YStack gap="$3">
               {topSchools.map((item) => (
                 <View
-                  key={item.rank}
+                  key={item.school}
                   style={{
                     backgroundColor: '#F7F7F7',
                     borderRadius: 12,
                     padding: 12,
                   }}
                 >
-                  <XStack justify="space-between" items="center">
+                  <XStack key={item.school} justify="space-between" items="center">
                     <Paragraph fontWeight="700">
                       #{item.rank} {item.school}
                     </Paragraph>
