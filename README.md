@@ -59,8 +59,11 @@ Click the different icons at the bottom to see the different screens. Here are s
 >>>> /app Business logic
 
 >>>>> /features Screen-level feature modules
+
 >>>>> /api API client layer (senseiClient.ts)
+
 >>>>> /provider React context providers shared across platforms.
+
 >>>>> /utils Utilities and helpers.
 
 >>>> /ui Shared UI component library (Tamagui-based)
@@ -81,3 +84,12 @@ Kaia: Database, Frontend
 
 ## Lessons Learned
 
+We learned many lessons through this group project! Some technical things that we learned include the following:
+- Fixing broken builds & debugging build/execution errors
+- Unit testing: Seeding test database w/ Foreign Key relations
+- Frontend testing: Learned how to test components
+- Android studio emulator: Learned to reset the emulator often to clear issues
+- REST API: Learned proper async/await, promise syntax
+- Github: Handling PRs, using `git patch`
+
+In addition, we learned interpersonal skills such as communication and organization. We figured out how to communicate with each other as a group, how often to meet, when not to meet, etc. We built teamwork and leadership skills over the course of this project.
