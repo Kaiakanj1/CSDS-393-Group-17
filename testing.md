@@ -73,6 +73,8 @@ To run the REST API tests locally, you need to set up the dependencies, build th
 ### Overview
 To satisfy the CSDS 493 quality artifact requirement, I implemented automated testing for the Feed feature, focusing on both helper-level correctness and integration of frontend data processing logic.
 
+**Testing files exist at: sensei-productivity/apps/expo/__tests__**
+
 ### Components Tested
 
 #### 1. Helper Function Unit Tests (`profileHelpers.test.ts`)
