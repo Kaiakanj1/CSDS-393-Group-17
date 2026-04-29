@@ -18,6 +18,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from "../lib/storage.js"
 import { io } from "socket.io-client";
+import { mapCategory, formatPostTime } from '../../utils/profileHelpers'
 
 // establishes a websocket connection to the server for real-time feed updates
 const feedSocket = io("https://messaging.csds393-group17-rest-api.aurora-interactive.online:7654", {
@@ -114,7 +115,7 @@ export function FeedScreen() {
           return {
             id: item.postId,
             user: userInfo.username,
-            category: item.categoryName,
+            category: mapCategory(item.categoryName),
             likes: item.likes,
             date: item.postDate,
             likedByCurrentUser: item.likedByCurrentUser,
@@ -268,7 +269,7 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
 
           <XStack justify="space-between" items="center">
             <Paragraph fontWeight="600">{post.category}</Paragraph>
-            <Paragraph color="#666">{formatDate(post.date)}</Paragraph>
+            <Paragraph color="#666">{formatPostTime(post.date)}</Paragraph>
           </XStack>
 
           <XStack justify="space-between" items="center">
