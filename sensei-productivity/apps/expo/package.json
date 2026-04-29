@@ -14,9 +14,12 @@
   },
   "jest": {
     "preset": "jest-expo",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.ts"
+    ]
   },
   "dependencies": {
+    "@aurora-interactive/sensei-productivity": "1.9.0",
     "@babel/runtime": "^7.26.0",
     "@expo/config-plugins": "~10.0.0",
     "@my/ui": "0.0.1",

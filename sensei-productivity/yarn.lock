@@ -36,6 +36,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aurora-interactive/sensei-productivity@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@aurora-interactive/sensei-productivity@npm:1.9.0"
+  dependencies:
+    zod: "npm:^3.25.65 || ^4.0.0"
+  checksum: 10/d1880f25fb266e9ec1f06cee3a09195a67e51f54ced3f57df8d4ad923e53bf1c47140a40de3f7d847777439d2b79fc763c6e17a115f57aa02633f590a819fc7c
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:7.10.4, @babel/code-frame@npm:~7.10.4":
   version: 7.10.4
   resolution: "@babel/code-frame@npm:7.10.4"
@@ -11158,6 +11167,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "expo-app@workspace:apps/expo"
   dependencies:
+    "@aurora-interactive/sensei-productivity": "npm:1.9.0"
     "@babel/core": "npm:^7.24.6"
     "@babel/runtime": "npm:^7.26.0"
     "@expo/config-plugins": "npm:~10.0.0"
