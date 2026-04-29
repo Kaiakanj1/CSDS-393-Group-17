@@ -1,5 +1,8 @@
+/**
+ * This is the main screen for the Tasks feature (home screen) in the Expo app. 
+ * It uses the HomeScreen component to display the tasks.
+ */
 import { HomeScreen } from 'app/features/home/screen'
-import { LoginScreen } from 'app/features/login/login-screen'
 import { Stack } from 'expo-router'
 
 export default function Screen() {
@@ -14,17 +17,3 @@ export default function Screen() {
     </>
   )
 }
-
-
-// export function HomeScreen() {
-//   return (
-//     <>
-//       <Stack.Screen
-//         options={{
-//           title: 'Tasks',
-//         }}
-//       />
-//       <HomeScreen />
-//     </>
-//   )
-// }

@@ -1,3 +1,8 @@
+/**
+ * This file contains components used by the login-screen.
+ * The implementation of various input components using the Tamagui library. 
+ * It defines a context for managing input-related properties such as size, color, and icon scaling. 
+ */
 import { getFontSized } from '@tamagui/get-font-sized'
 import { getSpace } from '@tamagui/get-token'
 import { User } from '@tamagui/lucide-icons'

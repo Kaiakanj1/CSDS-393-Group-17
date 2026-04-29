@@ -1,5 +1,8 @@
+/**
+ * This file contains the profile screen, which displays the user's profile information and their posts. 
+ * It also allows the user to perform actions on their profile, such as adding friends or banning users (for demonstration purposes).
+ */
 'use client'
-
 import { useEffect, useState } from 'react'
 import {
   Avatar,
@@ -25,6 +28,10 @@ import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from '../lib/storage.js'
 import { mapCategory, formatPostTime } from '../../utils/profileHelpers'
 
+/**
+ * Types for user profile and feed posts. 
+ * Represents the user's profile information, while the FeedPost type represents individual posts made by the user.
+ */
 type Profile = {
   userId: number
   userName: string
@@ -33,6 +40,9 @@ type Profile = {
   userClass: number
 }
 
+/**
+ * Represents a post made by the user, including details such as the post's category, title, body, number of likes, and time of posting.
+ */
 type FeedPost = {
   id: number
   user: string
@@ -44,6 +54,10 @@ type FeedPost = {
   time: string
 }
 
+/**
+ * Defines the styles for different post categories, including background colors and icons.
+ * This is used to visually differentiate posts based on their category in the feed and profile screens.
+ */
 const categoryStyles = {
   School: {
     bg: '#EC417A',
@@ -59,33 +73,11 @@ const categoryStyles = {
   },
 } as const
 
-// now in a helper function since it's also used in the feed screen
-
-// function mapCategory(categoryName: string): 'School' | 'Work' | 'Wellness' {
-//   const lower = categoryName?.toLowerCase?.() ?? ''
-
-//   if (lower.includes('school') || lower.includes('academic')) return 'School'
-//   if (lower.includes('work')) return 'Work'
-//   if (lower.includes('well') || lower.includes('health') || lower.includes('personal')) return 'Wellness'
-
-//   return 'School'
-// }
-
-// now in a helper function since it's also used in the feed screen
-
-// function formatPostTime(dateValue: string | Date) {
-//   const date = new Date(dateValue)
-//   if (Number.isNaN(date.getTime())) return ''
-
-//   return date.toLocaleString(undefined, {
-//     year: 'numeric',
-//     month: 'short',
-//     day: 'numeric',
-//     hour: 'numeric',
-//     minute: '2-digit',
-//   })
-// }
-
+/**
+ * The main profile screen component that displays the user's profile information and their posts.
+ * It also includes a button that allows the user to perform actions on their profile, such as adding friends or banning users (for demonstration purposes).
+ * The component fetches the user's profile and posts from the API when it mounts and handles loading and error states appropriately.
+ */
 export function ProfileScreen() {
   const [profile, setProfile] = useState<Profile>({
     userId: 0,
@@ -95,11 +87,18 @@ export function ProfileScreen() {
     userClass: 128,
   })
 
+  /**
+   * State variables for the user's posts, whether the action button can be clicked, the API SDK instance, and the loading state.
+   */
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [canClick, setCanClick] = useState(true)
   const [sdk, setSdk] = useState(new SenseiProductivity())
   const [loading, setLoading] = useState(true)
 
+  /**
+   * Defines the possible actions that can be performed on the user's profile, the resulting state after performing the action, and the corresponding toast messages and icons for each action.
+   * This is used to manage the state of the action button and provide feedback to the user when they perform an action on their profile.
+   */
   const userAction = { 0: 'Add Friend', 64: 'Remove From School', 128: 'Ban User' } as const
   const afterAction = { 0: 'Friend Request Pending', 64: 'User Removed from School', 128: 'User Banned' } as const
   const actionToast = { 0: 'Friend request sent!', 64: 'User removed from school!', 128: 'User banned from app!' } as const
@@ -109,6 +108,9 @@ export function ProfileScreen() {
     128: <FontAwesome6 name="school-circle-xmark" size={24} color="white" />,
   } as const
 
+  /**
+   * Handles the action button click event. Depending on the current state of the button (whether it can be clicked or not), it will perform the corresponding action and update the state accordingly.
+   */
   function handleAction() {
     if (canClick) {
       console.log('@' + profile.userName + ': ' + actionToast[profile.userClass])
@@ -246,6 +248,9 @@ export function ProfileScreen() {
   )
 }
 
+/**
+ * Component that represents an individual post in the user's feed. It displays the post's category, title, body, number of likes, and time of posting.
+ */
 function FeedCard({ post }: { post: FeedPost }) {
   const category = categoryStyles[post.category]
 
@@ -309,6 +314,9 @@ function FeedCard({ post }: { post: FeedPost }) {
   )
 }
 
+/**
+ * Component that represents an action button for a post, such as the like button. It displays an icon and the corresponding text (e.g., number of likes).
+ */
 function ActionButton({
   icon,
   text,

@@ -1,3 +1,6 @@
+/**
+ * This is the root layout for the Expo app. It sets up the theme, fonts, and navigation structure.
+ */
 import { useEffect, useState } from 'react'
 import { useColorScheme } from 'react-native'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
@@ -21,6 +24,10 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
 
+/**
+ * The main App component that initializes fonts, manages the splash screen, and sets up the navigation structure.
+ * It also checks for the access token to determine whether to show the login screen or the main app tabs.
+ */
 export default function App() {
   const [interLoaded, interError] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
@@ -41,6 +48,9 @@ export default function App() {
   return <RootLayoutNav />;
 }
 
+/**
+ * The RootLayoutNav component manages the navigation structure of the app. 
+ */
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
   const [accessToken, setAccessToken] = useState(null);

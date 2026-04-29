@@ -1,5 +1,7 @@
+/**
+ * This file contains the implementation of the feed screen for the Sensei Productivity app.
+ */
 'use client'
-
 import { useEffect, useState } from 'react'
 import {
   Avatar,
@@ -45,7 +47,10 @@ type FeedPost = {
   details: string
 }
 
-// main feed screen component
+/** 
+ * Main feed screen component for the Sensei Productivity app. 
+ * It displays a list of posts from users, allows filtering by category, and supports liking/unliking posts. The feed updates in real-time through a websocket connection. 
+ */
 export function FeedScreen() {
 
   // state variables for feed data, loading and error states, selected filter, and API SDK instance
@@ -214,6 +219,10 @@ export function FeedScreen() {
   )
 }
 
+/**
+ * Component representing an individual post in the feed. 
+ * It displays the post's details, including the user who made the post, the category, the time it was posted, and the number of likes. It also allows the user to like or unlike the post, optimistically updating the UI and confirming with the API. If the API call fails, it rolls back the optimistic update and shows an error in the console.
+ */
 function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
   const [liked, setLiked] = useState(post.likedByCurrentUser)
   const [likes, setLikes] = useState(post.likes)
@@ -290,6 +299,12 @@ function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
     </Theme>
   )
 }
+
+/**
+ * Component representing a filter chip used to filter posts by category in the feed. 
+ * It displays a label and changes its appearance based on whether it is active or not. 
+ * When pressed, it calls the provided onPress function to update the selected filter in the parent component.
+ */
 function FilterChip({
   label,
   active,
@@ -318,6 +333,11 @@ function FilterChip({
   )
 }
 
+/**
+ * Component representing an action button used in the feed, such as the like button. 
+ * It displays an icon and a text (number of likes) and is used to trigger actions like liking or unliking a post. 
+ * The appearance of the button can be customized based on the action it represents.
+ */
 function ActionButton({
   icon,
   text,
