@@ -1,6 +1,13 @@
+/**
+ * This file contains the useDateAnimation hook which is used in the date picker.
+ */
 import { useDatePickerContext } from '@rehookify/datepicker'
 import { useEffect, useState } from 'react'
 
+/**
+ * This hook is used to animate the month and year when the user changes the month or year in the date picker. 
+ * It listens to the month, year or years and returns the appropriate animation styles for the enter and exit animations.
+ */
 export function useDateAnimation({
   listenTo,
 }: {

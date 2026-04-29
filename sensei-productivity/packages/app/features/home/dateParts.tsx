@@ -1,3 +1,7 @@
+/**
+ * This file contains custom date picker components built on top of @rehookify/datepicker and styled with Tamagui. 
+ * It includes a main DatePicker component, as well as subcomponents for month and year selection, and a customizable header.
+ */
 import type { DatePickerProviderProps } from '@rehookify/datepicker'
 import { DatePickerProvider, useDatePickerContext } from '@rehookify/datepicker'
 import { getFontSized } from '@tamagui/get-font-sized'
@@ -22,25 +26,39 @@ import { type ReactNode, useEffect, useRef } from 'react'
 import { Input } from './inputsParts'
 import { useDateAnimation } from './useDateAnimation'
 
+/**
+ * DatePickerProps type extends the PopoverProps from Tamagui and includes a required 'config' property that is used to configure the DatePickerProvider from @rehookify/datepicker.
+ */
 type DatePickerProps = PopoverProps & {
   config: DatePickerProviderProps['config']
 }
 
+/**
+ * Type that defines the possible header types for the date picker, which can be 'day', 'month', or 'year'.
+ */
 export type HeaderType = 'day' | 'month' | 'year'
 
-/** rehookify internally return `onClick` and that's incompatible with native */
+/** 
+ * This utility function swaps `onClick` with `onPress` to ensure compatibility with Tamagui's event system.
+*/
 export function swapOnClick<D>(d: D) {
   //@ts-ignore
   d.onPress = d.onClick
   return d
 }
 
+/**
+ * Creates a styled context for managing the header type state in the date picker. The context provides a 'type' property to indicate the current header type (day, month, year) and a 'setHeader' function to update the header type. This allows different components within the date picker to access and modify the header state as needed.
+ */
 export const { Provider: HeaderStyleTypeProvider, useStyledContext: useHeaderType } =
   createStyledContext({
     type: 'day',
     setHeader: (_: HeaderType) => {},
   })
 
+/**
+ * Component that wraps the DatePickerProvider from @rehookify/datepicker and provides the header type context to its children. It accepts a 'config' prop for configuring the DatePickerProvider and manages the state of the header type (day, month, year) using the HeaderStyleTypeProvider. This component serves as a higher-level provider that encapsulates both the date picker logic and the header state management.
+ */
 export const HeaderTypeProvider = ({
   config,
   ...props
@@ -57,19 +75,16 @@ export const HeaderTypeProvider = ({
   )
 }
 
+/**
+ * The main DatePicker implementation component.
+ * It uses a Popover to display the date picker content and includes logic to close the popover when scrolling on web platforms. The DatePickerContent is styled with Tamagui and includes an Arrow component for visual indication.
+ */
 const DatePickerImpl = (props: DatePickerProps) => {
   const { children, config, ...rest } = props
   const popoverRef = useRef<Popover>(null)
-
-  // hide date picker on scroll (web)
   useEffect(() => {
     if (isWeb) {
       const controller = new AbortController()
-      // NOTE: For cross-browser compatibility:
-      // - We use document.addEventListener('scroll', ...) instead of document.body.addEventListener because Safari does not fire scroll events on body.
-      // - We use capture: true because Chrome only fires scroll events on document in the capture phase.
-      //   (Chrome works with document.body.addEventListener and capture: false, but that is not reliable in Safari.)
-      // This combination ensures the scroll event is caught in both Chrome and Safari.
       document.addEventListener(
         'scroll',
         () => {
@@ -109,6 +124,9 @@ const DatePickerImpl = (props: DatePickerProps) => {
   )
 }
 
+/**
+ * Styled component for the DatePicker content. 
+ */
 const DatePickerContent = styled(Popover.Content, {
   transition: 'quick',
   variants: {
@@ -129,6 +147,9 @@ const DatePickerContent = styled(Popover.Content, {
   },
 })
 
+/**
+ * Renders the date picker body, which includes the header and the appropriate picker (month, year, day) based on the current header state. It uses the HeaderTypeProvider to manage the header state and conditionally renders the MonthPicker, YearPicker, or DayPicker components accordingly.
+ */
 export const DatePicker = withStaticProperties(DatePickerImpl, {
   Trigger: Popover.Trigger,
   Content: withStaticProperties(DatePickerContent, {
@@ -144,6 +165,9 @@ type DatePickerInputProps = {
   onButtonPress?: (e: GestureReponderEvent) => void
 }
 
+/**
+ * Renders the input component for the date picker, which includes a text area to display the selected date and a button to open the date picker or reset the selection. The input is styled with Tamagui and includes logic to handle button presses for both opening the date picker and resetting the selected date. The button icon changes based on whether a date is currently selected or not.
+ */
 export const DatePickerInput = Input.Area.styleable<DatePickerInputProps>(
   (props, ref) => {
     const { value, onButtonPress, size = '$3', onReset, ...rest } = props
@@ -189,6 +213,9 @@ export const DatePickerInput = Input.Area.styleable<DatePickerInputProps>(
   }
 )
 
+/**
+ * Renders the month picker component within the date picker.
+ */
 export function MonthPicker({
   onChange = (_e, _date) => {
     'noop'
@@ -246,6 +273,9 @@ export function MonthPicker({
   )
 }
 
+/**
+ * Renders the year picker component within the date picker.
+ */
 export function YearPicker({
   onChange = () => {},
 }: {
@@ -301,6 +331,10 @@ export function YearPicker({
     </AnimatePresence>
   )
 }
+
+/**
+ * Renders the year range slider.
+ */
 export function YearRangeSlider() {
   const {
     data: { years },
@@ -328,6 +362,9 @@ export function YearRangeSlider() {
   )
 }
 
+/**
+ * Renders the month and year header with navigation buttons.
+ */
 export function YearSlider() {
   const {
     data: { calendars },
@@ -370,6 +407,9 @@ export function YearSlider() {
   )
 }
 
+/**
+ * Renders the calendar header with month and year display, and allows switching between month and year selection.
+ */
 export const CalendarHeader = ({
   year,
   month,
@@ -411,6 +451,9 @@ export const CalendarHeader = ({
   )
 }
 
+/**
+ * Renders the week view header, displaying the days of the week in a row. 
+ */
 export const WeekView = ({
   weekDays,
   ...props
@@ -429,13 +472,16 @@ export const WeekView = ({
   )
 }
 
+/**
+ * Styled text component that accepts a 'size' variant to adjust the font size based on the theme's font size tokens. 
+ */
 export const SizableText = styled(Text, {
   name: 'SizableText',
   fontFamily: '$body',
 
   variants: {
     size: {
-      '...fontSize': getFontSized as any, // TODO: revisit after v2 migration
+      '...fontSize': getFontSized as any,
     },
   } as const,
 

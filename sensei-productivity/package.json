@@ -33,7 +33,7 @@
     "react-native-web": "0.21.2"
   },
   "dependencies": {
-    "@aurora-interactive/sensei-productivity": "1.8.0",
+    "@aurora-interactive/sensei-productivity": "1.9.0",
     "@babel/runtime": "^7.24.6",
     "@rehookify/datepicker": "^6.6.8",
     "@tamagui/checkbox": "2.0.0-rc.16",

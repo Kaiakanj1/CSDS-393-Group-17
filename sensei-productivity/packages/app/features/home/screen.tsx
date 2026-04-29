@@ -1,48 +1,58 @@
+/**
+ * This file contains the main HomeScreen component which displays the user's tasks and allows them to create new tasks. 
+ * It uses the SenseiProductivity SDK to fetch and manage tasks, and Tamagui for UI components. 
+ * The user can mark tasks as completed, and create new tasks with a description, category, and deadline.
+ */
 'use client'
 import { useEffect, useState } from 'react'
 import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from '../lib/storage.js'
-import { DatePickerExample } from './DatePicker'
+import { DatePickerComponent } from './DatePicker'
 import {
-  Anchor, Button, H1, Paragraph, Separator, Sheet, SwitchThemeButton,
+  Button, H1, Paragraph, Sheet, SwitchThemeButton,
   useToastController, XStack, YStack, ScrollView
 } from '@my/ui'
-import { ChevronDown, ChevronUp, Check as CheckIcon } from '@tamagui/lucide-icons'
+import { Check as CheckIcon } from '@tamagui/lucide-icons'
 import { Checkbox, Label, Theme, Input } from 'tamagui'
 import type { CheckboxProps } from 'tamagui'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Feather from '@expo/vector-icons/Feather'
-import { View, StyleSheet, Platform, Alert } from 'react-native'
-import { useLink } from 'solito/navigation'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { View, Platform, Alert } from 'react-native'
 
+
+/**
+ * Task type definition representing a user's task with an id, description, category, and deadline.
+ */
 type Task = {
   id: number
   description: string
   category: string
   deadline: Date
-  likedByCurrentUser: boolean
 }
 
+/**
+ * Main HomeScreen component that displays the user's tasks and allows them to create new tasks.
+ */
 export function HomeScreen() {
+  // State variables for managing tasks, loading state, error messages, and SDK instance
   const [selectedFilter, setSelectedFilter] = useState<
     'All' | 'School' | 'Work' | 'Personal'
   >('All')
-
   const [posts, setPosts] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [sdk, setSdk] = useState(new SenseiProductivity())
 
-  const [showSearch, setShowSearch] = useState(false)
-  const [usernameInput, setUsernameInput] = useState('')
-  const [friendMessage, setFriendMessage] = useState('')
-    useEffect(() => {
+  useEffect(() => {
     init()
   }, [])
 
+  /**
+   * Loads tasks for the authenticated user.
+   * @param authedSdk 
+   */
   async function loadTasks(authedSdk?: SenseiProductivity) {
     try {
       setLoading(true)
@@ -74,6 +84,10 @@ export function HomeScreen() {
     }
   }
 
+  /**
+   * Initializes the SDK with the user's access token and loads their tasks. 
+   * If the user is not logged in, it sets an error message.
+   */
   async function init() {
     try {
       setLoading(true)
@@ -187,6 +201,10 @@ export function HomeScreen() {
   )
 }
 
+/**
+ * Component representing a single task with a checkbox to mark it as completed. 
+ * It displays the task description and deadline, and calls the provided onCheckedChange function when the checkbox state changes.
+ */
 function TaskCheckbox({
   size = "$4",
   label = "New task",
@@ -204,7 +222,6 @@ function TaskCheckbox({
               <CheckIcon />
             </Checkbox.Indicator>
           </Checkbox>
-
           <Label size={size} htmlFor={`${postId}`} opacity={checkboxProps.checked == true ? 0.5 : 1}>
             {label}
           </Label>
@@ -217,6 +234,10 @@ function TaskCheckbox({
   )
 }
 
+/**
+ * NewTaskButton component that opens a sheet allowing the user to create a new task with a description, category, and deadline.
+ * It uses the SenseiProductivity SDK to create the task and calls the onTaskCreated callback to refresh the task list after creation.
+ */
 function NewTaskButton({
   onTaskCreated,
 }: {
@@ -224,17 +245,19 @@ function NewTaskButton({
 }) {
   const toast = useToastController()
 
+  // State variables for managing the sheet's open state, position, task description, category, selected dates, submitting state, and SDK instance
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState(0)
-
   const [taskDescription, setTaskDescription] = useState('')
   const [categoryName, setCategoryName] = useState<string>('')
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [submitting, setSubmitting] = useState(false)
   
-
   const [sdk, setSdk] = useState(new SenseiProductivity())
 
+  /**
+   * Resets the form fields and closes the sheet after a task is created.
+   */
   function resetForm() {
     setOpen(false)
     setTaskDescription('')
@@ -246,6 +269,10 @@ function NewTaskButton({
     initSdk()
   }, [])
 
+  /**
+   * Initializes the SenseiProductivity SDK with the user's access token. If the user is not logged in, it logs an error message.
+   * This function is called when the component mounts to ensure the SDK is ready for creating tasks.
+   */
   async function initSdk() {
     try {
       const accessToken = appStorage.getString('accessToken')
@@ -264,6 +291,10 @@ function NewTaskButton({
     }
   }
 
+  /**
+   * Handles the creation of a new task by validating the input fields, calling the SDK to create the task, and refreshing the task list.
+   * It also displays appropriate alerts for validation errors and success/failure of task creation.
+   */
   async function handleCreateTask() {
     try {
       if (!taskDescription.trim()) {
@@ -317,6 +348,9 @@ function NewTaskButton({
     }
   }
 
+  /**
+   * Opens the sheet when the "New Task" button is pressed. 
+   */
   function newTask() {
     setOpen(true)
   }
@@ -410,7 +444,7 @@ function NewTaskButton({
             </XStack>
 
             <Label>Deadline</Label>
-            <DatePickerExample
+            <DatePickerComponent
               selectedDates={selectedDates}
               onDatesChange={setSelectedDates}
             />

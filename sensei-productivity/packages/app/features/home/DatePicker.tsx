@@ -1,3 +1,6 @@
+/**
+ * This file contains the date picker component that is used by the new task function in the HomeScreen. */
+
 import {
   useDatePickerContext,
   type DatePickerProviderProps,
@@ -23,6 +26,9 @@ import {
 } from './dateParts'
 import { useDateAnimation } from './useDateAnimation'
 
+/**
+ * DateHeader component that displays the header of the date picker, which includes the month and year, and buttons to navigate between months. 
+ */
 function DateHeader() {
   const {
     data: { calendars },
@@ -61,6 +67,9 @@ function DateHeader() {
   )
 }
 
+/**
+ * DayPicker component that displays the days of the month in a grid, and allows the user to select a day. 
+ */
 function DayPicker() {
   const {
     data: { calendars, weekDays },
@@ -145,6 +154,9 @@ function DayPicker() {
   )
 }
 
+/**
+ * DatePickerBody component that displays the body of the date picker, which includes the DateHeader and the DayPicker. 
+ */
 function DatePickerBody({ config }: { config: DatePickerProviderProps['config'] }) {
   const [header, setHeader] = useState<HeaderType>('day')
 
@@ -167,8 +179,10 @@ function DatePickerBody({ config }: { config: DatePickerProviderProps['config'] 
   )
 }
 
-/** ------ EXAMPLE ------ */
-export function DatePickerExample({
+/**
+ * DatePicker component that uses the @rehookify/datepicker library to create a working date picker.
+ */
+export function DatePickerComponent({
   selectedDates,
   onDatesChange,
 }: {

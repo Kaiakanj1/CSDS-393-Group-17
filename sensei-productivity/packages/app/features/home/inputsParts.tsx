@@ -1,3 +1,8 @@
+/**
+ * This file contains input components and related styled components for the date picker feature in the home screen of the app. 
+ * It defines a context for managing input styles, as well as various styled components such as Input, InputGroup, InputIcon, and InputLabel. 
+ * These components are designed to be flexible and customizable, allowing for different sizes, colors, and icon scaling based on the provided context values. The file also includes an example of how to use the Input component with an icon and a text area.
+ */
 import { getFontSized } from '@tamagui/get-font-sized'
 import { getSpace } from '@tamagui/get-token'
 import { User } from '@tamagui/lucide-icons'

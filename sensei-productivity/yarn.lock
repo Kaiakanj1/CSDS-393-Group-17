@@ -27,12 +27,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aurora-interactive/sensei-productivity@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@aurora-interactive/sensei-productivity@npm:1.8.0"
+"@aurora-interactive/sensei-productivity@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@aurora-interactive/sensei-productivity@npm:1.9.0"
   dependencies:
     zod: "npm:^3.25.65 || ^4.0.0"
-  checksum: 10/566bc526b7d162df2ca9c3236927683358bb325182ef083d29f09962835b962fb7a530cafb6fd30f818175d5d7ef7bd7b74823e6ac729704698e114374e22a33
+  checksum: 10/d1880f25fb266e9ec1f06cee3a09195a67e51f54ced3f57df8d4ad923e53bf1c47140a40de3f7d847777439d2b79fc763c6e17a115f57aa02633f590a819fc7c
   languageName: node
   linkType: hard
 
@@ -16816,7 +16816,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sensei-productivity@workspace:."
   dependencies:
-    "@aurora-interactive/sensei-productivity": "npm:1.8.0"
+    "@aurora-interactive/sensei-productivity": "npm:1.9.0"
     "@babel/runtime": "npm:^7.24.6"
     "@biomejs/biome": "npm:^1.9.3"
     "@rehookify/datepicker": "npm:^6.6.8"
