@@ -66,3 +66,52 @@ To run the REST API tests locally, you need to set up the dependencies, build th
 **Important Limitations:**
 * The default `npm test` script in `package.json` is not configured for Cypress and will currently exit with an error (`"echo \"Error: no test specified\" && exit 1"`). You must use the `npx cypress run` command directly.
 * A live database connection must be present and correctly authenticated via your `.env` variables for the backend to start and for tests to pass.
+
+
+## Quality Artifact: Feed Data Transformation & Integration Testing (Kaia Kanj 493)
+
+### Overview
+To satisfy the CSDS 493 quality artifact requirement, I implemented automated testing for the Feed feature, focusing on both helper-level correctness and integration of frontend data processing logic.
+
+### Components Tested
+
+#### 1. Helper Function Unit Tests (`profileHelpers.test.ts`)
+I created unit tests for core helper functions used in the Feed feature:
+
+- **`mapCategory`**
+  - Maps backend category names (e.g., "Academic", "Professional") to frontend display categories ("School", "Work", "Personal")
+
+- **`formatPostTime`**
+  - Formats backend timestamps into human-readable dates
+  - Handles invalid or missing date values gracefully
+
+These tests ensure correctness of individual logic components used throughout the feed pipeline.
+
+---
+
+#### 2. Integration-Style Test (`feedHelpers.integration.test.ts`)
+I implemented an integration-style test that simulates how backend feed data is transformed into frontend-ready display data.
+
+This test:
+- Takes a mock API response object (simulating backend data)
+- Applies helper functions (`mapCategory`, `formatPostTime`)
+- Constructs the final object used by the Feed UI
+- Verifies that all fields are correctly transformed and preserved
+
+### Example Flow Tested
+- Backend category `"Academic"` → mapped to `"School"`
+- Raw timestamp → formatted date string
+- Post metadata (likes, user, caption) preserved correctly
+
+
+The integration-style test validates interaction between multiple parts of the system, including:
+
+- Backend-style data structures  
+- Frontend transformation logic  
+- Helper utilities  
+- UI-ready data formatting  
+
+---
+
+### Conclusion
+This testing approach ensures that feed data flows correctly from backend responses to frontend display, improving reliability and catching issues that would not be detected by unit tests alone.
