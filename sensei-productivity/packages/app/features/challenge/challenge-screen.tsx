@@ -281,16 +281,16 @@
 import { useEffect, useState } from 'react'
 import { Button, H2, Paragraph, XStack, YStack } from '@my/ui'
 import { View, ActivityIndicator } from 'react-native'
-import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
+import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'  // pulls from api
 import { appStorage } from "../lib/storage.js"
 
-type LeaderboardSchool = {
+type LeaderboardSchool = {  // object type for leaderboard entries
   rank: number
   school: string
   points: number
 }
 
-export function ChallengeAdminScreen() {
+export function ChallengeAdminScreen() { 
   const [sdk, setSdk] = useState(new SenseiProductivity())
   const [topSchools, setTopSchools] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -307,7 +307,7 @@ export function ChallengeAdminScreen() {
 
     const accessToken = appStorage.getString("accessToken")
     if (accessToken === undefined) {
-      throw "User is not logged in somehow!"
+      throw "User is not logged in somehow!"  // this should never happen since the screen is gated, but just in case
     }
 
     const authedSdk = new SenseiProductivity({
@@ -316,12 +316,12 @@ export function ChallengeAdminScreen() {
 
     setSdk(authedSdk)
 
-    const res = await authedSdk.schools.leaderboard();
+    const res = await authedSdk.schools.leaderboard(); // pulls from api
 
-    const mappedSchools = res
+    const mappedSchools = res 
       .map((item: any) => ({
         school: item.schoolName,
-        points: item.points ?? 0
+        points: item.points ?? 0 // default to 0 if points is null or undefined
       }))
       .sort((a, b) => b.points - a.points)
       .slice(0, 5)
@@ -329,14 +329,14 @@ export function ChallengeAdminScreen() {
     setTopSchools(mappedSchools)
 
   } catch (err) {
-    console.error('Leaderboard load failed:', err)
-    setError('Failed to load leaderboard')
+    console.error('Leaderboard load failed:', err) 
+    setError('Failed to load leaderboard') // error message
   } finally {
     setLoading(false)
   }
 }
-
-  return (
+// UI rendering with loading, error, and data states
+  return ( 
     <YStack flex={1} bg="#404040" p="$4" gap="$4">
       <XStack justify="space-between" items="center">
         <H2 color="white">Leaderboard</H2>
