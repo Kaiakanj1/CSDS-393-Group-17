@@ -19,19 +19,21 @@ import { SenseiProductivity } from '@aurora-interactive/sensei-productivity'
 import { appStorage } from "../lib/storage.js"
 import { io } from "socket.io-client";
 
+// establishes a websocket connection to the server for real-time feed updates
 const feedSocket = io("https://messaging.csds393-group17-rest-api.aurora-interactive.online:7654", {
   transports: ['websocket']
 });
 
+// Socket event listeners for real-time feed updates
 feedSocket.on("connect", () => {
   console.log("Connected! ID:", feedSocket.id);
   feedSocket.emit("loginAs", "Revvz");
 });
-
+// Listen for messages from the server and log them
 feedSocket.on("message", (data) => {
   console.log("Received:", data);
 });
-
+// Define the structure of a feed post 
 type FeedPost = {
   id: number
   user: number
@@ -42,8 +44,10 @@ type FeedPost = {
   details: string
 }
 
-
+// main feed screen component
 export function FeedScreen() {
+
+  // state variables for feed data, loading and error states, selected filter, and API SDK instance
   const [selectedFilter, setSelectedFilter] = useState<
     'All' | 'School' | 'Work' | 'Personal'
   >('All')
@@ -117,7 +121,7 @@ export function FeedScreen() {
             details: postInfo.caption
           }
         } catch (e) {
-          console.log("Failed to get user info")
+          console.log("Failed to get user info") 
           console.log(e)
         }
       }))
@@ -134,7 +138,7 @@ export function FeedScreen() {
   const filteredPosts =
     selectedFilter === 'All'
       ? posts
-      : posts.filter((post) => post.category === selectedFilter)
+      : posts.filter((post) => post.category === selectedFilter) // filters posts based on the selected category filter. If "All" is selected, it returns all posts; otherwise, it returns only the posts that match the selected category.
 
   return (
     <YStack flex={1} bg="#404040">
@@ -207,26 +211,6 @@ export function FeedScreen() {
       </YStack>
     </YStack>
   )
-}
-
-function mapCategory(category: string): 'School' | 'Work' | 'Personal' {
-  if (!category) return 'School'
-
-  const lower = category.toLowerCase()
-
-  if (lower.includes('school')) return 'School'
-  if (lower.includes('work')) return 'Work'
-  if (lower.includes('personal')) return 'Personal'
-
-  return 'School'
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 function FeedCard({ post, sdk }: { post: FeedPost, sdk: SenseiProductivity }) {
