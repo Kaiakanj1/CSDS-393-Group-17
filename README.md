@@ -30,7 +30,9 @@ Ensure XCode and/or Android Studio is installed then navigate to `sensei-product
 
 ## Usage Example
 Try logging in with the following credentials:
+
 username: Atri
+
 password: Antonios12!
 
 Click the different icons at the bottom to see the different screens. Here are some examples of what a user might do.
@@ -42,6 +44,40 @@ Click the different icons at the bottom to see the different screens. Here are s
 
 ## Repo Folder Overview
 
+> CSDS-393-Group-17
+
+>> /sensei-productivity Directory containing all the code for this project.
+
+>>> /apps Contains the two deployable applications
+
+>>>> /expo React Native (Expo) mobile app.
+
+>>>> /next Next.js web app. We chose not to pursue this direction.
+
+>>> /packages Shared code that would be used by both apps.
+
+>>>> /app Business logic
+
+>>>>> /features Screen-level feature modules
+>>>>> /api API client layer (senseiClient.ts)
+>>>>> /provider React context providers shared across platforms.
+>>>>> /utils Utilities and helpers.
+
+>>>> /ui Shared UI component library (Tamagui-based)
+
+>>>> /config Shared configuration (Tamagui theme, fonts, animations)
+
+
 ## Team Member Roles and Contributions
 
+Antonios: REST API, REST API SDK, Socket.IO, Front-End Integration
+
+Atri: Backend, REST API
+
+Hilary: Frontend, UI Design, Team Lead
+
+Kaia: Database, Frontend
+
+
 ## Lessons Learned
+
